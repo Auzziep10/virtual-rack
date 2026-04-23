@@ -1,0 +1,20 @@
+{
+  "name": "virtual-rack",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "db:generate": "turbo run db:generate --filter=@virtual-rack/db",
+    "db:push": "turbo run db:push --filter=@virtual-rack/db",
+    "db:seed": "turbo run db:seed --filter=@virtual-rack/db"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "turbo": "^1.13.2"
+  }
+}

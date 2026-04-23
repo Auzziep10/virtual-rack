@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String        @id @default(uuid())
+  email            String        @unique
+  name             String?
+  avatar3dUrl      String?       // Splat/USDZ URL
+  measurements     Json?         // Stores SMPL-X shape parameters or basic measurements
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  virtualRacks     VirtualRack[]
+}
+
+model Merchant {
+  id               String        @id @default(uuid())
+  name             String
+  storeMetadata    Json?         // e.g., location, description, branding
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  garments         Garment[]
+}
+
+model Garment {
+  id               String        @id @default(uuid())
+  merchantId       String
+  name             String
+  description      String?
+  assetUsdzUrl     String?
+  assetGlbUrl      String?
+  occasionTags     String[]      // e.g., ["Gala", "Beach", "Professional"]
+  fabricMetadata   Json?         // e.g., {"material": "cotton", "stretch": "high"}
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  merchant         Merchant      @relation(fields: [merchantId], references: [id])
+  virtualRacks     VirtualRack[]
+}
+
+model VirtualRack {
+  id               String        @id @default(uuid())
+  userId           String
+  garmentId        String
+  addedAt          DateTime      @default(now())
+
+  user             User          @relation(fields: [userId], references: [id])
+  garment          Garment       @relation(fields: [garmentId], references: [id])
+
+  @@unique([userId, garmentId])
+}
