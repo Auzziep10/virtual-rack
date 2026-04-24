@@ -8,8 +8,26 @@ interface GarmentModelProps {
   url: string;
 }
 
+class ErrorBoundary extends React.Component<{children: React.ReactNode}, {hasError: boolean}> {
+  constructor(props: {children: React.ReactNode}) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() { return { hasError: true }; }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <mesh>
+          <boxGeometry args={[0.5, 1.5, 0.5]} />
+          <meshStandardMaterial color="red" wireframe />
+        </mesh>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function GarmentModel({ url }: GarmentModelProps) {
-  // Try loading GLB/GLTF. Note: error handling is omitted for simplicity
   const { scene } = useGLTF(url);
   return <primitive object={scene} />;
 }
@@ -23,7 +41,9 @@ export default function RackScene({ garments = [] }: { garments: any[] }) {
             {garments.map((g, i) => (
               g.assetGlbUrl ? (
                 <group key={g.id} position={[i * 1.5, 0, 0]}>
-                  <GarmentModel url={g.assetGlbUrl} />
+                  <ErrorBoundary>
+                    <GarmentModel url={g.assetGlbUrl} />
+                  </ErrorBoundary>
                 </group>
               ) : null
             ))}

@@ -26,8 +26,19 @@ async function getGarments(): Promise<Garment[]> {
   }
 }
 
+async function getUser() {
+  try {
+    return await prisma.user.findFirst();
+  } catch (error) {
+    console.error("Failed to fetch user:", error);
+    return null;
+  }
+}
+
 export default async function VirtualRackPage() {
   const garments = await getGarments();
+  const user = await getUser();
+  const userId = user?.id || 'user-123';
 
   // If no garments exist yet, fallback to a placeholder list for the UI layout
   const displayGarments = garments.length > 0 ? garments : [
@@ -36,20 +47,20 @@ export default async function VirtualRackPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-50 p-8 font-sans selection:bg-neutral-800">
+    <div className="min-h-screen bg-neutral-50 text-neutral-900 p-8 font-sans selection:bg-neutral-200">
       <header className="max-w-6xl mx-auto mb-12 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-light tracking-tight">The Virtual Rack</h1>
-          <p className="text-neutral-400 mt-2 text-sm uppercase tracking-widest">Curated Occasion Wardrobe</p>
+          <p className="text-neutral-500 mt-2 text-sm uppercase tracking-widest">Curated Occasion Wardrobe</p>
         </div>
-        <nav className="flex gap-6 text-sm text-neutral-400">
-          <a href="#" className="hover:text-white transition-colors">Catalog</a>
-          <a href="#" className="hover:text-white transition-colors">My Fits</a>
-          <a href="#" className="text-white border-b border-white pb-1">Rack</a>
+        <nav className="flex gap-6 text-sm text-neutral-500">
+          <a href="#" className="hover:text-neutral-900 transition-colors">Catalog</a>
+          <a href="#" className="hover:text-neutral-900 transition-colors">My Fits</a>
+          <a href="#" className="text-neutral-900 border-b border-neutral-900 pb-1">Rack</a>
         </nav>
       </header>
 
-      <ClientStage displayGarments={displayGarments} />
+      <ClientStage displayGarments={displayGarments} userId={userId} />
     </div>
   );
 }

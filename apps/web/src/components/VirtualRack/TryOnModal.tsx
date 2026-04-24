@@ -8,10 +8,11 @@ import { Loader2 } from 'lucide-react'
 interface TryOnModalProps {
   garmentId: string
   garmentName: string
+  userId: string
   onSimulationComplete: (simulatedUrl: string) => void
 }
 
-export function TryOnModal({ garmentId, garmentName, onSimulationComplete }: TryOnModalProps) {
+export function TryOnModal({ garmentId, garmentName, userId, onSimulationComplete }: TryOnModalProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [isSimulating, setIsSimulating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -21,16 +22,13 @@ export function TryOnModal({ garmentId, garmentName, onSimulationComplete }: Try
     setError(null)
 
     try {
-      // Assuming a mock logged-in user ID for the sake of the prototype
-      const mockUserId = 'user-123'
-
       const response = await fetch('/api/vto/drape', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          userId: mockUserId,
+          userId: userId,
           garmentId: garmentId
         })
       })
@@ -54,34 +52,32 @@ export function TryOnModal({ garmentId, garmentName, onSimulationComplete }: Try
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="w-full bg-white text-black hover:bg-neutral-200 mt-4">
-          Try On 3D
-        </Button>
+      <DialogTrigger render={<Button className="w-full bg-neutral-900 text-white hover:bg-neutral-800 mt-4" />}>
+        Try On 3D
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] bg-neutral-900 border-neutral-800 text-white shadow-2xl">
+      <DialogContent className="sm:max-w-[425px] bg-white border-neutral-200 text-neutral-900 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="tracking-wide">Virtual Try-On</DialogTitle>
-          <DialogDescription className="text-neutral-400">
+          <DialogDescription className="text-neutral-500">
             Initiate physics simulation mapping the {garmentName} to your SMPL-X body profile.
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4 py-4">
-          <p className="text-sm text-neutral-300">
+          <p className="text-sm text-neutral-600">
             This will dispatch the high-fidelity 3D garment mesh and your body parameters to our secure GPU workers.
           </p>
 
           {error && (
-            <div className="p-3 bg-red-950 border border-red-800 rounded-md">
-              <p className="text-red-400 text-sm font-medium">{error}</p>
+            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
+              <p className="text-red-600 text-sm font-medium">{error}</p>
             </div>
           )}
 
           <Button 
             onClick={handleTryOn} 
             disabled={isSimulating}
-            className="w-full bg-white text-black hover:bg-neutral-200"
+            className="w-full bg-neutral-900 text-white hover:bg-neutral-800"
           >
             {isSimulating ? (
               <>

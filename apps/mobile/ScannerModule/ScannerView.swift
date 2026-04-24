@@ -39,10 +39,10 @@ struct ScannerView: View {
         switch viewModel.state {
         case .ready: return "Ready to Scan"
         case .capturing: return "Capturing..."
-        case .reconstructing: return "Reconstructing 3D Model..."
+        case .reconstructing(let progress): return "Reconstructing: \(Int(progress * 100))%"
         case .uploading: return "Uploading to Firebase..."
         case .completed: return "Upload Complete!"
-        case .error(let err): return "Error: \(err.localizedDescription)"
+        case .error(let err): return "Error: \(err)"
         }
     }
     
@@ -51,11 +51,10 @@ struct ScannerView: View {
             if viewModel.state == .ready {
                 Button(action: {
                     var configuration = ObjectCaptureSession.Configuration()
-                    // Enables bounding box interactions to specify the capture volume
                     configuration.isUserCompletedBoundingBoxEnabled = true
                     
-                    session?.start(imagesDirectory: getDocumentsDirectory().appendingPathComponent("Scans"),
-                                   configuration: configuration)
+                    let imagesDir = getDocumentsDirectory().appendingPathComponent("Scans")
+                    session?.start(imagesDirectory: imagesDir, configuration: configuration)
                     viewModel.startCapture()
                 }) {
                     Text("Start Scan")
@@ -67,8 +66,8 @@ struct ScannerView: View {
             } else if viewModel.state == .capturing {
                 Button(action: {
                     session?.finish()
-                    viewModel.finishCapture()
-                    // Reconstruct logic would trigger here
+                    let imagesDir = getDocumentsDirectory().appendingPathComponent("Scans")
+                    viewModel.finishCapture(imagesDirectory: imagesDir)
                 }) {
                     Text("Finish Capture")
                         .padding()
