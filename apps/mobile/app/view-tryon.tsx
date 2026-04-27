@@ -1,5 +1,6 @@
 import React from 'react';
-import { StyleSheet, View, Image, TouchableOpacity, Text } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -13,8 +14,16 @@ export default function ViewTryOnScreen() {
   return (
     <View style={styles.container}>
       {uri ? (
-        <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode="contain" />
-      ) : null}
+        <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="contain" />
+      ) : (
+        <Text style={{ color: 'red', marginTop: 100, textAlign: 'center' }}>No URI provided</Text>
+      )}
+      
+      {/* DEBUG TEXT - REMOVE LATER */}
+      <View style={{ position: 'absolute', top: 100, left: 20, right: 20, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.8)', padding: 10 }}>
+        <Text style={{ color: 'yellow', fontSize: 10 }}>URI: {uri}</Text>
+        <Text style={{ color: 'yellow', fontSize: 10 }}>Raw Param: {params.uri}</Text>
+      </View>
 
       {/* Top Bar Area */}
       <View style={[styles.topBar, { top: insets.top + 20 }]}>
