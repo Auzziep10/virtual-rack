@@ -1,5 +1,5 @@
-import React from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -13,8 +13,16 @@ const OCCASIONS = [
   'Lounge',
 ];
 
+const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+const ITEM_HEIGHT = 80;
+
 export default function OccasionScreen() {
   const insets = useSafeAreaInsets();
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  // Calculate padding so first and last items can be centered
+  const halfScreen = SCREEN_HEIGHT / 2;
+  const listPadding = halfScreen - (ITEM_HEIGHT / 2) - 40; // 40 is a slight offset for visual balance
 
   return (
     <View style={[styles.container, { backgroundColor: '#fafafa' }]}>
@@ -24,25 +32,74 @@ export default function OccasionScreen() {
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
-      <ScrollView
+      <Text style={[styles.promptTitle, { top: insets.top + 120 }]}>Select an Occasion</Text>
+
+      <Animated.FlatList
+        data={OCCASIONS}
+        keyExtractor={(item) => item}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={[styles.scrollContent, { paddingTop: insets.top + 120 }]}
-      >
-        <Text style={styles.promptTitle}>Select an Occasion</Text>
-        
-        <View style={styles.listContainer}>
-          {OCCASIONS.map((occasion) => (
-            <TouchableOpacity 
-              key={occasion} 
-              style={styles.itemButton}
-              activeOpacity={0.6}
-              onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion } })}
+        snapToInterval={ITEM_HEIGHT}
+        decelerationRate="fast"
+        bounces={true}
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+        contentContainerStyle={{
+          paddingTop: listPadding,
+          paddingBottom: listPadding,
+        }}
+        renderItem={({ item, index }) => {
+          const inputRange = [
+            (index - 2) * ITEM_HEIGHT,
+            (index - 1) * ITEM_HEIGHT,
+            index * ITEM_HEIGHT,
+            (index + 1) * ITEM_HEIGHT,
+            (index + 2) * ITEM_HEIGHT,
+          ];
+
+          const scale = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.7, 0.8, 1.15, 0.8, 0.7],
+            extrapolate: 'clamp',
+          });
+
+          const opacity = scrollY.interpolate({
+            inputRange,
+            outputRange: [0.2, 0.5, 1, 0.5, 0.2],
+            extrapolate: 'clamp',
+          });
+
+          const translateY = scrollY.interpolate({
+            inputRange,
+            outputRange: [20, 10, 0, -10, -20],
+            extrapolate: 'clamp',
+          });
+
+          return (
+            <Animated.View
+              style={[
+                styles.itemContainer,
+                {
+                  transform: [{ scale }, { translateY }],
+                  opacity,
+                },
+              ]}
             >
-              <Text style={styles.itemText}>{occasion}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item } })}
+              >
+                <Text style={styles.itemText}>{item}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        }}
+      />
+      
+      {/* Selection Indicator (Subtle Center Highlight) */}
+      <View style={styles.selectionIndicator} pointerEvents="none" />
     </View>
   );
 }
@@ -68,30 +125,36 @@ const styles = StyleSheet.create({
     letterSpacing: 5,
     opacity: 0.8,
   },
-  scrollContent: {
-    paddingBottom: 60,
-    paddingHorizontal: 24,
-  },
   promptTitle: {
+    position: 'absolute',
+    width: '100%',
+    textAlign: 'center',
     fontSize: 16,
     color: '#666',
     textTransform: 'uppercase',
     letterSpacing: 2,
-    marginBottom: 40,
-    alignSelf: 'center',
+    zIndex: 5,
   },
-  listContainer: {
+  itemContainer: {
+    height: ITEM_HEIGHT,
+    justifyContent: 'center',
     alignItems: 'center',
-    gap: 32,
-  },
-  itemButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
   },
   itemText: {
     fontFamily: 'Times New Roman',
     fontSize: 42,
     color: '#111',
     fontStyle: 'italic',
+  },
+  selectionIndicator: {
+    position: 'absolute',
+    top: '50%',
+    marginTop: -40,
+    width: '100%',
+    height: ITEM_HEIGHT,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: 'rgba(0,0,0,0.05)',
+    zIndex: -1,
   },
 });
