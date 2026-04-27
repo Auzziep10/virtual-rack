@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
 import { router } from 'expo-router';
