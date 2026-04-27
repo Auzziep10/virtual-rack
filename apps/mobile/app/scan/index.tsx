@@ -4,7 +4,8 @@ import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-s
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
+import { storage, db } from '@/lib/firebase';
 import { Alert } from 'react-native';
 
 export default function ScanningScreen() {
@@ -73,6 +74,12 @@ export default function ScanningScreen() {
       // Upload to Firebase Storage
       await uploadBytes(storageRef, blob);
       const downloadUrl = await getDownloadURL(storageRef);
+      
+      // Save metadata to Firestore
+      await addDoc(collection(db, 'scans'), {
+        objUrl: downloadUrl,
+        createdAt: new Date().toISOString(),
+      });
       
       Alert.alert("Success", "3D Scan saved successfully!");
       console.log("Uploaded obj URL:", downloadUrl);

@@ -14,6 +14,7 @@ const { width } = Dimensions.get('window');
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const [tryOns, setTryOns] = useState<any[]>([]);
+  const [scans, setScans] = useState<any[]>([]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -30,8 +31,23 @@ export default function DashboardScreen() {
           console.error("Error fetching try-ons:", error);
         }
       }
+
+      async function fetchScans() {
+        try {
+          const q = query(collection(db, 'scans'), orderBy('createdAt', 'desc'), limit(4));
+          const querySnapshot = await getDocs(q);
+          const fetched = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setScans(fetched);
+        } catch (error) {
+          console.error("Error fetching scans:", error);
+        }
+      }
       
       fetchTryOns();
+      fetchScans();
     }, [])
   );
 
@@ -96,15 +112,27 @@ export default function DashboardScreen() {
         </View>
         
         <View style={styles.grid}>
-          {[1, 2].map((item) => (
-            <View key={`scan-${item}`} style={styles.card}>
-              <View style={styles.cardImagePlaceholder}>
-                <IconSymbol name="figure.stand" size={40} color="#ccc" />
+          {scans.length > 0 ? (
+            scans.map((item, index) => (
+              <View key={item.id} style={styles.card}>
+                <View style={styles.cardImagePlaceholder}>
+                  <IconSymbol name="cube.transparent" size={40} color="#8a2be2" />
+                </View>
+                <Text style={styles.cardTitle}>Body Scan {scans.length - index}</Text>
+                <Text style={styles.cardDate}>
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </Text>
               </View>
-              <Text style={styles.cardTitle}>Body Scan {item}</Text>
-              <Text style={styles.cardDate}>Today</Text>
+            ))
+          ) : (
+            <View style={[styles.card, { width: '100%' }]}>
+              <View style={styles.cardImagePlaceholder}>
+                <IconSymbol name="cube.transparent" size={40} color="#ccc" />
+              </View>
+              <Text style={styles.cardTitle}>No Scans Yet</Text>
+              <Text style={styles.cardDate}>Tap 3D Body Scan to start</Text>
             </View>
-          ))}
+          )}
         </View>
 
         <View style={[styles.sectionHeader, { marginTop: 30 }]}>
