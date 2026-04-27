@@ -73,14 +73,15 @@ export default function CustomCameraScreen() {
         setCountdown(i);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
+      // Clear countdown and wait for UI to fully render before hitting the camera hardware
+      setCountdown(null);
+      await new Promise(resolve => setTimeout(resolve, 150));
     }
 
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
       });
-      
-      setCountdown(null); // Clear countdown AFTER taking the picture to prevent re-render crash
       
       if (photo && photo.uri) {
         // Go back to occasion screen with the new photo URI
@@ -125,11 +126,9 @@ export default function CustomCameraScreen() {
         </BlurView>
 
         {/* Huge Countdown Display */}
-        {countdown !== null && (
-          <View style={styles.countdownContainer}>
-            <Text style={styles.countdownText}>{countdown}</Text>
-          </View>
-        )}
+        <View style={[styles.countdownContainer, { opacity: countdown !== null ? 1 : 0 }]}>
+          <Text style={styles.countdownText}>{countdown || ''}</Text>
+        </View>
 
         {/* Bottom Controls Overlay */}
         <BlurView 
