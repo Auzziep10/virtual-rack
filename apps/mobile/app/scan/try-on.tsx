@@ -23,6 +23,12 @@ export default function TryOnScreen() {
   const imageUri = params.imageUri as string | undefined;
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+  const ITEM_HEIGHT = 80;
+  
+  // Calculate padding to perfectly center the first and last items in the available scroll view
+  const listHeight = SCREEN_HEIGHT - insets.top - 100 - 120;
+  const listPadding = Math.max(0, (listHeight - ITEM_HEIGHT) / 2);
 
   const [currentImageUri, setCurrentImageUri] = useState<string | undefined>(imageUri);
   const [garments, setGarments] = useState<Garment[]>([]);
@@ -172,50 +178,62 @@ export default function TryOnScreen() {
       </TouchableOpacity>
 
       {/* Garment Bubbles */}
-      <View style={[styles.bubblesContainer, { marginTop: insets.top + 100, zIndex: 5 }]}>
+      <View style={[styles.bubblesContainer, { top: insets.top + 100, zIndex: 5 }]}>
         <Animated.FlatList
           data={garments}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
+          snapToInterval={ITEM_HEIGHT}
+          decelerationRate="fast"
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
           )}
           scrollEventThrottle={16}
-          contentContainerStyle={{ paddingVertical: 60 }} // padding so top/bottom items can reach middle
+          contentContainerStyle={{ paddingTop: listPadding, paddingBottom: listPadding }}
           renderItem={({ item: garment, index }) => {
-            const ITEM_HEIGHT = 80; // 60 height + 20 marginBottom
             const itemPosition = index * ITEM_HEIGHT;
             
-            // Fade out when scrolling up (past top) or down (past bottom)
-            // The visible window is roughly 500px tall
+            // Smoother rolodex fade and scale
             const opacity = scrollY.interpolate({
               inputRange: [
-                itemPosition - 400, // item is far above
-                itemPosition - 300, // item entering from top
-                itemPosition,       // item at top of scroll
-                itemPosition + 200, // item near bottom
-                itemPosition + 300  // item far below
+                itemPosition - ITEM_HEIGHT * 2,
+                itemPosition - ITEM_HEIGHT,
+                itemPosition,
+                itemPosition + ITEM_HEIGHT,
+                itemPosition + ITEM_HEIGHT * 2
               ],
-              outputRange: [0, 1, 1, 1, 0],
+              outputRange: [0, 0.4, 1, 0.4, 0],
               extrapolate: 'clamp',
             });
 
             const scale = scrollY.interpolate({
               inputRange: [
-                itemPosition - 400,
-                itemPosition - 300,
+                itemPosition - ITEM_HEIGHT * 2,
+                itemPosition - ITEM_HEIGHT,
                 itemPosition,
-                itemPosition + 200,
-                itemPosition + 300
+                itemPosition + ITEM_HEIGHT,
+                itemPosition + ITEM_HEIGHT * 2
               ],
-              outputRange: [0.8, 1, 1, 1, 0.8],
+              outputRange: [0.6, 0.8, 1, 0.8, 0.6],
+              extrapolate: 'clamp',
+            });
+            
+            const translateY = scrollY.interpolate({
+              inputRange: [
+                itemPosition - ITEM_HEIGHT * 2,
+                itemPosition - ITEM_HEIGHT,
+                itemPosition,
+                itemPosition + ITEM_HEIGHT,
+                itemPosition + ITEM_HEIGHT * 2
+              ],
+              outputRange: [30, 15, 0, -15, -30],
               extrapolate: 'clamp',
             });
 
             const isSelected = selectedGarment?.id === garment.id;
             return (
-              <Animated.View style={{ opacity, transform: [{ scale }] }}>
+              <Animated.View style={{ opacity, transform: [{ scale }, { translateY }] }}>
                 <TouchableOpacity
                   style={[
                     styles.bubble,
