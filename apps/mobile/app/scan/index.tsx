@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
 import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -9,7 +9,6 @@ import { storage, db } from '@/lib/firebase';
 import { Alert } from 'react-native';
 
 export default function ScanningScreen() {
-  const scanAnim = useRef(new Animated.Value(0)).current;
   const scannerRef = useRef<RoomScannerViewRef>(null);
 
   useEffect(() => {
@@ -20,23 +19,6 @@ export default function ScanningScreen() {
       }
     }, 500);
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(scanAnim, {
-          toValue: 1,
-          duration: 2500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(scanAnim, {
-          toValue: 0,
-          duration: 2500,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-
     return () => {
       clearTimeout(timer);
       // Stop the session on unmount to save battery
@@ -44,12 +26,7 @@ export default function ScanningScreen() {
         scannerRef.current.stopSession();
       }
     };
-  }, [scanAnim]);
-
-  const translateY = scanAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [100, 600],
-  });
+  }, []);
 
   const handleCapture = () => {
     if (scannerRef.current) {
@@ -101,19 +78,6 @@ export default function ScanningScreen() {
         onModelReady={handleModelReady}
       />
       
-      {/* Animated Scan Line */}
-      <Animated.View style={[styles.scanLineContainer, { transform: [{ translateY }] }]} pointerEvents="none">
-        <View style={styles.scanLine} />
-        <View style={styles.scanGlow} />
-      </Animated.View>
-
-      {/* Grid Overlay Rings (Simulated Cylinder) */}
-      <View style={styles.gridContainer} pointerEvents="none">
-        {[100, 200, 300, 400, 500, 600, 700].map((y) => (
-          <View key={y} style={[styles.gridRing, { top: y }]} />
-        ))}
-      </View>
-
       {/* Top Bar */}
       <View style={styles.topBar}>
         <Text style={styles.logo}>WOVN</Text>
@@ -162,44 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 5,
     opacity: 0.8,
-  },
-  gridContainer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    opacity: 0.3,
-  },
-  gridRing: {
-    position: 'absolute',
-    width: '70%',
-    height: 60,
-    borderRadius: 30,
-    borderWidth: 1,
-    borderColor: '#fff',
-    transform: [{ scaleY: 0.3 }], // Make it look like an ellipse
-  },
-  scanLineContainer: {
-    position: 'absolute',
-    width: '100%',
-    alignItems: 'center',
-    zIndex: 5,
-  },
-  scanLine: {
-    width: '75%',
-    height: 2,
-    backgroundColor: '#fff',
-    shadowColor: '#fff',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 10,
-    elevation: 5,
-  },
-  scanGlow: {
-    position: 'absolute',
-    width: '70%',
-    height: 40,
-    top: -20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 20,
   },
   controlsContainer: {
     position: 'absolute',
