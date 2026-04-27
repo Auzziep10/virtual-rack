@@ -1,17 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
-// Mock Garments for the selected occasion
-const MOCK_GARMENTS = [
-  { id: '1', type: 'top', color: '#f5f5dc', name: 'Beige Sweater', image: 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?auto=format&fit=crop&w=200&q=80' },
-  { id: '2', type: 'bottom', color: '#1a1a24', name: 'Dark Denim', image: 'https://images.unsplash.com/photo-1542272604-787c3835535d?auto=format&fit=crop&w=200&q=80' },
-  { id: '3', type: 'top', color: '#ffffff', name: 'White Blouse', image: 'https://images.unsplash.com/photo-1564222256577-45e728f2c611?auto=format&fit=crop&w=200&q=80' },
-  { id: '4', type: 'bottom', color: '#a8b5c8', name: 'Light Trousers', image: '' },
-  { id: '5', type: 'dress', color: '#000000', name: 'Black Dress', image: '' },
-];
+interface Garment {
+  id: string;
+  name: string;
+  type: string;
+  occasion: string;
+  color: string;
+  image: string;
+}
 
 export default function TryOnScreen() {
   const params = useLocalSearchParams();
@@ -19,34 +21,31 @@ export default function TryOnScreen() {
   const imageUri = params.imageUri as string | undefined;
   const insets = useSafeAreaInsets();
 
-  const [selectedGarment, setSelectedGarment] = useState<string | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [resultImage, setResultImage] = useState<string | null>(null);
+  const [garments, setGarments] = useState<Garment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
 
-  const handleGarmentSelect = async (garmentId: string) => {
-    setSelectedGarment(garmentId);
-    
-    // --- AI API Integration Stub ---
-    // The user will provide the API endpoint for the image-to-image pipeline.
-    // Example Payload expected:
-    // {
-    //   "user_image": "base64_string_or_url",
-    //   "garment_image": "garment_url_or_id",
-    //   "category": "upper_body" // or lower_body, dress
-    // }
-    
-    setIsGenerating(true);
-    try {
-      // Simulating network delay for now
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      // Fake success
-      Alert.alert("AI Generation Simulated", `Applied ${MOCK_GARMENTS.find(g => g.id === garmentId)?.name} to avatar!`);
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Error", "Failed to generate try-on image.");
-    } finally {
-      setIsGenerating(false);
+  useEffect(() => {
+    async function fetchGarments() {
+      try {
+        const q = query(collection(db, 'garments'), where('occasion', '==', occasion));
+        const querySnapshot = await getDocs(q);
+        const fetched = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Garment[];
+        setGarments(fetched);
+      } catch (error) {
+        console.error("Error fetching garments:", error);
+      } finally {
+        setLoading(false);
+      }
     }
+    fetchGarments();
+  }, [occasion]);
+
+  const handleGarmentSelect = (garment: Garment) => {
+    setSelectedGarment(garment);
   };
 
   return (
@@ -56,10 +55,20 @@ export default function TryOnScreen() {
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : null}
-        {isGenerating && (
+
+        {/* Paper Doll Try-On Overlay Effect */}
+        {selectedGarment && selectedGarment.image ? (
+          <Image 
+            source={{ uri: selectedGarment.image }} 
+            style={styles.paperDollOverlay} 
+            resizeMode="contain" 
+          />
+        ) : null}
+
+        {loading && (
           <View style={styles.loadingOverlay}>
             <ActivityIndicator size="large" color="#000" />
-            <Text style={styles.loadingText}>Generating fit...</Text>
+            <Text style={styles.loadingText}>Loading wardrobe...</Text>
           </View>
         )}
       </View>
@@ -81,8 +90,8 @@ export default function TryOnScreen() {
       {/* Garment Bubbles */}
       <View style={[styles.bubblesContainer, { marginTop: insets.top + 100 }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          {MOCK_GARMENTS.map((garment) => {
-            const isSelected = selectedGarment === garment.id;
+          {garments.map((garment) => {
+            const isSelected = selectedGarment?.id === garment.id;
             return (
               <TouchableOpacity
                 key={garment.id}
@@ -91,7 +100,7 @@ export default function TryOnScreen() {
                   isSelected && styles.bubbleSelected,
                   { backgroundColor: '#f0f0f0' } // use a solid background for the image to sit on
                 ]}
-                onPress={() => handleGarmentSelect(garment.id)}
+                onPress={() => handleGarmentSelect(garment)}
               >
                 {garment.image ? (
                   <Image 
@@ -100,7 +109,7 @@ export default function TryOnScreen() {
                     resizeMode="cover" 
                   />
                 ) : (
-                  <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color, borderRadius: 28 }]} />
+                  <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
                 )}
               </TouchableOpacity>
             );
@@ -166,6 +175,15 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#000',
+  },
+  paperDollOverlay: {
+    position: 'absolute',
+    width: '80%',
+    height: '60%',
+    top: '25%',
+    alignSelf: 'center',
+    zIndex: 2,
+    opacity: 0.95,
   },
   bubblesContainer: {
     position: 'absolute',
