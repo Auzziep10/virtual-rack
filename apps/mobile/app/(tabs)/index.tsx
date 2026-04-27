@@ -9,7 +9,7 @@ import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system/legacy';
-import RoomScannerModule from '../../modules/room-scanner';
+import { previewModel } from '../../modules/room-scanner';
 
 const { width } = Dimensions.get('window');
 
@@ -67,8 +67,7 @@ export default function DashboardScreen() {
       if (!fileInfo.exists) {
         await FileSystem.downloadAsync(scan.objUrl, localUri);
       }
-      
-      await RoomScannerModule.previewModel(localUri);
+      await previewModel(localUri);
     } catch (error) {
       console.error('Error previewing scan:', error);
       alert('Failed to load 3D scan. Please try again.');
