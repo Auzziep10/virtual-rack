@@ -1,0 +1,181 @@
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { collection, addDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage, app } from '@/lib/firebase';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { Alert } from 'react-native';
+
+interface TryOnTask {
+  id: string;
+  garmentId: string;
+  garmentName: string;
+  status: 'processing' | 'done' | 'error';
+}
+
+interface TaskContextType {
+  activeTasks: TryOnTask[];
+  cachedResults: Record<string, string>;
+  dispatchTryOnTask: (imageUri: string, garment: any) => void;
+  clearCache: (garmentId: string) => void;
+}
+
+const TaskContext = createContext<TaskContextType | undefined>(undefined);
+
+export function TaskProvider({ children }: { children: ReactNode }) {
+  const [activeTasks, setActiveTasks] = useState<TryOnTask[]>([]);
+  const [cachedResults, setCachedResults] = useState<Record<string, string>>({});
+
+  async function compressAndGetBase64(uri: string): Promise<{ data: string; mimeType: string }> {
+    let targetUri = uri;
+
+    if (!uri.startsWith('http')) {
+      const manipResult = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1024 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      targetUri = manipResult.uri;
+    }
+
+    const response = await fetch(targetUri);
+    const blob = await response.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        const mimeType = blob.type || 'image/jpeg';
+        resolve({
+          data: base64data.split(',')[1],
+          mimeType
+        });
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function uploadImageToFirebase(base64Str: string): Promise<string> {
+    const match = base64Str.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!match) return base64Str;
+    const ext = match[1].split('/')[1] || 'png';
+    const fileName = `tryons/img_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+    
+    const storageRef = ref(storage, fileName);
+    const response = await fetch(base64Str);
+    const blob = await response.blob();
+    
+    await uploadBytes(storageRef, blob);
+    return await getDownloadURL(storageRef);
+  }
+
+  const clearCache = (garmentId: string) => {
+    setCachedResults(prev => {
+      const next = { ...prev };
+      delete next[garmentId];
+      return next;
+    });
+  };
+
+  const dispatchTryOnTask = async (currentImageUri: string, garment: any) => {
+    const taskId = Date.now().toString();
+    const garmentId = garment.id;
+    
+    setActiveTasks(prev => [...prev, { id: taskId, garmentId, garmentName: garment.name, status: 'processing' }]);
+
+    try {
+      // 1. Compress
+      const baseResult = await compressAndGetBase64(currentImageUri);
+      const garmentResult = await compressAndGetBase64(garment.image);
+
+      // 2. Vertex AI
+      const projectId = app.options.projectId || 'virtual-rack';
+      const apiKey = app.options.apiKey;
+      const model = 'gemini-2.5-flash-image';
+      const endpoint = `https://firebasevertexai.googleapis.com/v1beta/projects/${projectId}/locations/us-central1/publishers/google/models/${model}:generateContent`;
+
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: "TASK: High-Fidelity Virtual Try-On.\nYou are an expert AI fashion retoucher.\nImage 1: A person.\nImage 2: A target garment.\n\nCRITICAL CONSTRAINTS:\n1. COMPLETELY REPLACE the user's current clothing with the target garment from Image 2.\n2. DO NOT just recolor the existing clothing. You MUST alter the garment shape, collar, sleeves, and details. If the original clothing has a hood, pocket, or zipper, and the target garment does not, REMOVE THEM entirely.\n3. The fabric texture (e.g. cashmere, knit, cotton), drape, and color must exactly match Image 2.\n4. Keep the exact background, face, hair, skin, and pose of the person in Image 1 perfectly intact.\n5. Ensure realistic lighting, shadows, and blending." },
+              { inlineData: { data: baseResult.data, mimeType: baseResult.mimeType } },
+              { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
+            ]
+          }
+        ]
+      };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-client': 'fire/12.12.1',
+          'x-goog-api-key': apiKey as string,
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.error?.message);
+      }
+
+      const candidates = result.candidates;
+      let base64Output = null;
+      if (candidates && candidates.length > 0) {
+        for (const part of candidates[0].content?.parts || []) {
+          if (part.inlineData) {
+            base64Output = `data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`;
+          }
+        }
+      }
+
+      if (!base64Output) {
+        throw new Error("No image generated from Gemini.");
+      }
+
+      // 3. Upload & Save
+      const finalUrl = await uploadImageToFirebase(base64Output);
+      await addDoc(collection(db, 'tryOns'), {
+        imageUrl: finalUrl,
+        garmentId: garment.id || '',
+        garmentName: garment.name || '',
+        createdAt: new Date().toISOString()
+      });
+
+      // Update cache with the new generated image URL
+      setCachedResults(prev => ({ ...prev, [garmentId]: finalUrl }));
+
+      // Task complete
+      setActiveTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'done' } : t));
+      
+      // Auto clear after 3s
+      setTimeout(() => {
+        setActiveTasks(prev => prev.filter(t => t.id !== taskId));
+      }, 3000);
+
+    } catch (error) {
+      console.error("Background Task Error:", error);
+      setActiveTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: 'error' } : t));
+      setTimeout(() => {
+        setActiveTasks(prev => prev.filter(t => t.id !== taskId));
+      }, 5000);
+    }
+  };
+
+  return (
+    <TaskContext.Provider value={{ activeTasks, cachedResults, dispatchTryOnTask, clearCache }}>
+      {children}
+    </TaskContext.Provider>
+  );
+}
+
+export function useTasks() {
+  const context = useContext(TaskContext);
+  if (context === undefined) {
+    throw new Error('useTasks must be used within a TaskProvider');
+  }
+  return context;
+}

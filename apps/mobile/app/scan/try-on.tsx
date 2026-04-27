@@ -4,10 +4,9 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, app } from '@/lib/firebase';
+import { db, app } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
-import * as ImageManipulator from 'expo-image-manipulator';
+import { useTasks } from '../context/TaskContext';
 
 interface Garment {
   id: string;
@@ -29,9 +28,7 @@ export default function TryOnScreen() {
   const [loading, setLoading] = useState(true);
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
   
-  // AI State
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [resultImage, setResultImage] = useState<string | null>(null);
+  const { activeTasks, cachedResults, dispatchTryOnTask, clearCache } = useTasks();
 
   useEffect(() => {
     async function fetchGarments() {
@@ -52,158 +49,47 @@ export default function TryOnScreen() {
     fetchGarments();
   }, [occasion]);
 
-  async function compressAndGetBase64(uri: string): Promise<{ data: string; mimeType: string }> {
-    let targetUri = uri;
-
-    // ImageManipulator cannot read remote HTTP URLs directly.
-    // If it's a remote URL (like our garments in Firebase), we skip compression 
-    // since they are usually pre-optimized, or we'd need to download them locally first.
-    // We strictly want to compress the massive 4K local camera photos (file://).
-    if (!uri.startsWith('http')) {
-      const manipResult = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: 1024 } }],
-        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-      );
-      targetUri = manipResult.uri;
-    }
-
-    // Read to base64
-    const response = await fetch(targetUri);
-    const blob = await response.blob();
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64data = reader.result as string;
-        const mimeType = blob.type || 'image/jpeg';
-        resolve({
-          data: base64data.split(',')[1],
-          mimeType
-        });
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  }
-
-  async function uploadImageToFirebase(base64Str: string): Promise<string> {
-    const match = base64Str.match(/^data:(image\/\w+);base64,(.+)$/);
-    if (!match) return base64Str;
-    const ext = match[1].split('/')[1] || 'png';
-    const fileName = `tryons/img_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
-    
-    const storageRef = ref(storage, fileName);
-    
-    // In React Native, Firebase's uploadString has an ArrayBuffer bug.
-    // Instead, we convert the base64 string to a native Blob using fetch, 
-    // and then upload it using uploadBytes.
-    const response = await fetch(base64Str);
-    const blob = await response.blob();
-    
-    await uploadBytes(storageRef, blob);
-    return await getDownloadURL(storageRef);
-  }
-
   const handleGarmentSelect = async (garment: Garment) => {
-    setSelectedGarment(garment);
-    
     if (!currentImageUri || !garment.image) {
       Alert.alert("Missing Media", "Make sure you took a photo and selected a garment.");
       return;
     }
 
-    setIsGenerating(true);
-    setResultImage(null);
+    setSelectedGarment(garment);
 
-    try {
-      // 1. Compress and Prepare Images (this drastically reduces Gemini latency)
-      const baseResult = await compressAndGetBase64(currentImageUri);
-      const garmentResult = await compressAndGetBase64(garment.image);
+    // If already cached or currently processing, do nothing
+    if (cachedResults[garment.id] || activeTasks.some(t => t.garmentId === garment.id)) {
+      return;
+    }
 
-      // 2. Call Firebase Vertex AI via direct REST to bypass React Native SDK bugs
-      const projectId = app.options.projectId || 'virtual-rack';
-      const apiKey = app.options.apiKey;
-      const model = 'gemini-2.5-flash-image';
-      
-      const endpoint = `https://firebasevertexai.googleapis.com/v1beta/projects/${projectId}/locations/us-central1/publishers/google/models/${model}:generateContent`;
+    dispatchTryOnTask(currentImageUri, garment);
+  };
 
-      const payload = {
-        contents: [
-          {
-            role: "user",
-            parts: [
-              { text: "TASK: High-Fidelity Virtual Try-On.\nYou are an expert AI fashion retoucher.\nImage 1: A person.\nImage 2: A target garment.\n\nCRITICAL CONSTRAINTS:\n1. COMPLETELY REPLACE the user's current clothing with the target garment from Image 2.\n2. DO NOT just recolor the existing clothing. You MUST alter the garment shape, collar, sleeves, and details. If the original clothing has a hood, pocket, or zipper, and the target garment does not, REMOVE THEM entirely.\n3. The fabric texture (e.g. cashmere, knit, cotton), drape, and color must exactly match Image 2.\n4. Keep the exact background, face, hair, skin, and pose of the person in Image 1 perfectly intact.\n5. Ensure realistic lighting, shadows, and blending." },
-              { inlineData: { data: baseResult.data, mimeType: baseResult.mimeType } },
-              { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
-            ]
-          }
-        ]
-      };
-
-      const res = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-client': 'fire/12.12.1',
-          'x-goog-api-key': apiKey as string,
-        },
-        body: JSON.stringify(payload)
-      });
-
-      const result = await res.json();
-
-      if (!res.ok) {
-        // Log detailed error from Firebase Vertex AI
-        console.error("Vertex AI API Error:", result.error);
-        
-        if (result.error?.message?.includes("has not been used in project")) {
-          Alert.alert(
-            "API Disabled", 
-            "You need to enable 'Vertex AI in Firebase' in your Firebase Console for the 'virtual-rack' project."
-          );
-        } else {
-          Alert.alert("Generation Error", result.error?.message || "Unknown error occurred");
-        }
-        throw new Error(result.error?.message);
-      }
-
-      const candidates = result.candidates;
-      let base64Output = null;
-      
-      if (candidates && candidates.length > 0) {
-        for (const part of candidates[0].content?.parts || []) {
-          if (part.inlineData) {
-            base64Output = `data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`;
-          }
-        }
-      }
-
-      if (!base64Output) {
-        throw new Error("No image generated from Gemini.");
-      }
-
-      // 3. Save to Firebase Storage
-      const finalUrl = await uploadImageToFirebase(base64Output);
-      
-      // 4. Display result
-      setResultImage(finalUrl);
-
-    } catch (error) {
-      console.error("AI Try-On Error:", error);
-      setSelectedGarment(null);
-    } finally {
-      setIsGenerating(false);
+  const handleRegenerate = () => {
+    if (selectedGarment && currentImageUri) {
+      clearCache(selectedGarment.id);
+      dispatchTryOnTask(currentImageUri, selectedGarment);
     }
   };
+
+  // Determine what image to show
+  let displayImage = currentImageUri;
+  let isGenerating = false;
+
+  if (selectedGarment) {
+    if (cachedResults[selectedGarment.id]) {
+      displayImage = cachedResults[selectedGarment.id];
+    } else if (activeTasks.some(t => t.garmentId === selectedGarment.id)) {
+      isGenerating = true;
+    }
+  }
 
   return (
     <View style={styles.container}>
       {/* Background (User Scan or Final AI Output) */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#e8d8c8' }]}>
-        {resultImage ? (
-          <Image source={{ uri: resultImage }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        ) : currentImageUri ? (
-          <Image source={{ uri: currentImageUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        {displayImage ? (
+          <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
           <View style={styles.photoPickerContainer}>
             <TouchableOpacity 
@@ -257,13 +143,6 @@ export default function TryOnScreen() {
             <Text style={styles.loadingText}>Loading wardrobe...</Text>
           </View>
         )}
-        {isGenerating && (
-          <View style={styles.loadingOverlay}>
-            <ActivityIndicator size="large" color="#8a2be2" />
-            <Text style={styles.loadingText}>Synthesizing Try-On...</Text>
-            <Text style={styles.loadingSubtext}>Gemini 2.5 Flash Image Model</Text>
-          </View>
-        )}
       </View>
 
       {/* Top Bar */}
@@ -271,6 +150,14 @@ export default function TryOnScreen() {
         <Text style={styles.logo}>WOVN</Text>
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
+
+      {/* Back Button */}
+      <TouchableOpacity 
+        style={[styles.backButton, { top: insets.top + 20 }]}
+        onPress={() => router.back()}
+      >
+        <IconSymbol name="chevron.left" size={24} color="#000" />
+      </TouchableOpacity>
 
       {/* Close Button */}
       <TouchableOpacity 
@@ -311,31 +198,18 @@ export default function TryOnScreen() {
         </ScrollView>
       </View>
 
-      {/* Save Button */}
-      <TouchableOpacity 
-        style={styles.saveButton}
-        onPress={async () => {
-          if (!resultImage) {
-            Alert.alert("Wait!", "Please select a garment and wait for the try-on to generate first.");
-            return;
-          }
-          try {
-            await addDoc(collection(db, 'tryOns'), {
-              imageUrl: resultImage,
-              garmentId: selectedGarment?.id || '',
-              garmentName: selectedGarment?.name || '',
-              createdAt: new Date().toISOString()
-            });
-            Alert.alert("Saved!", "Outfit saved to your virtual closet.");
-            router.navigate('/(tabs)');
-          } catch (error) {
-            console.error("Error saving try-on:", error);
-            Alert.alert("Error", "Could not save outfit to closet.");
-          }
-        }}
-      >
-        <Text style={styles.saveButtonText}>Save to Closet</Text>
-      </TouchableOpacity>
+      {/* Redo Button */}
+      {selectedGarment && cachedResults[selectedGarment.id] && (
+        <TouchableOpacity 
+          style={styles.redoButton}
+          onPress={handleRegenerate}
+        >
+          <IconSymbol name="arrow.clockwise" size={20} color="#fff" />
+          <Text style={styles.redoButtonText}>Regenerate</Text>
+        </TouchableOpacity>
+      )}
+
+      </View>
     </View>
   );
 }
@@ -360,6 +234,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 5,
     opacity: 0.8,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeButton: {
     position: 'absolute',
@@ -422,19 +307,22 @@ const styles = StyleSheet.create({
     borderColor: '#8a2be2',
     transform: [{ scale: 1.1 }],
   },
-  saveButton: {
+  redoButton: {
     position: 'absolute',
     bottom: 40,
     alignSelf: 'center',
     backgroundColor: '#000',
-    paddingHorizontal: 40,
-    paddingVertical: 16,
+    paddingHorizontal: 24,
+    paddingVertical: 14,
     borderRadius: 30,
     zIndex: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  saveButtonText: {
+  redoButtonText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '600',
   },
   photoPickerContainer: {

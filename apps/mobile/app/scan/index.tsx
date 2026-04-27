@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { db, storage } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
-import { storage, db } from '@/lib/firebase';
-import { Alert, ActivityIndicator } from 'react-native';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function ScanningScreen() {
+  const insets = useSafeAreaInsets();
   const scannerRef = useRef<RoomScannerViewRef>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -100,10 +101,20 @@ export default function ScanningScreen() {
       />
       
       {/* Top Bar */}
-      <View style={styles.topBar}>
+      <View style={[styles.topBar, { top: insets?.top ? insets.top + 20 : 40 }]}>
         <Text style={styles.logo}>WOVN</Text>
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
+
+      {/* Back Button */}
+      {!isProcessing && (
+        <TouchableOpacity 
+          style={[styles.backButton, { top: insets?.top ? insets.top + 20 : 40 }]}
+          onPress={() => router.back()}
+        >
+          <IconSymbol name="chevron.left" size={24} color="#000" />
+        </TouchableOpacity>
+      )}
 
       {/* Processing Overlay */}
       {isProcessing && (
@@ -171,6 +182,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 5,
     opacity: 0.8,
+  },
+  backButton: {
+    position: 'absolute',
+    left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   controlsContainer: {
     position: 'absolute',

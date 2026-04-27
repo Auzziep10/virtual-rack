@@ -3,6 +3,8 @@ import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions } from '
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { IconSymbol } from '@/components/ui/icon-symbol';
+
 const OCCASIONS = [
   'Casual',
   'Corporate',
@@ -31,6 +33,14 @@ export default function OccasionScreen() {
         <Text style={styles.logo}>WOVN</Text>
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
+
+      {/* Back Button */}
+      <TouchableOpacity 
+        style={[styles.backButton, { top: insets.top + 20 }]}
+        onPress={() => router.back()}
+      >
+        <IconSymbol name="chevron.left" size={24} color="#000" />
+      </TouchableOpacity>
 
       <Animated.Text 
         style={[
@@ -138,6 +148,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 5,
     opacity: 0.8,
+  },
+  backButton: {
+    position: 'absolute',
+    right: 30, // Aligning to the right to balance the WOVN logo on the left
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   promptTitle: {
     position: 'absolute',
