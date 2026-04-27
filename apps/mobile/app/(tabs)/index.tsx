@@ -130,14 +130,19 @@ export default function DashboardScreen() {
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
           {tryOns.length > 0 ? (
             tryOns.map((item) => (
-              <View key={item.id} style={styles.horizontalCard}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.horizontalCard}
+                activeOpacity={0.8}
+                onPress={() => router.push({ pathname: '/view-tryon', params: { uri: item.imageUrl, garmentName: item.garmentName } })}
+              >
                 <Image 
                   source={{ uri: item.imageUrl }} 
                   style={styles.horizontalCardImage} 
                   resizeMode="cover" 
                 />
                 <Text style={styles.cardTitle}>{item.garmentName || 'New Look'}</Text>
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
             <View style={styles.horizontalCard}>

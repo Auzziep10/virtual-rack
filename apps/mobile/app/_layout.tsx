@@ -44,6 +44,7 @@ export default function RootLayout() {
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="scan" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+          <Stack.Screen name="view-tryon" options={{ presentation: 'fullScreenModal', headerShown: false }} />
         </Stack>
         <TaskOverlay />
       </TaskProvider>
