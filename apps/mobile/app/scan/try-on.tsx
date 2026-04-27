@@ -7,6 +7,7 @@ import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, app } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
 
 interface Garment {
   id: string;
@@ -51,8 +52,16 @@ export default function TryOnScreen() {
     fetchGarments();
   }, [occasion]);
 
-  async function uriToBase64(uri: string): Promise<{ data: string; mimeType: string }> {
-    const response = await fetch(uri);
+  async function compressAndGetBase64(uri: string): Promise<{ data: string; mimeType: string }> {
+    // 1. Compress Image using ImageManipulator
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [{ resize: { width: 1024 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+    );
+
+    // 2. Read to base64
+    const response = await fetch(manipResult.uri);
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -99,9 +108,9 @@ export default function TryOnScreen() {
     setResultImage(null);
 
     try {
-      // 1. Prepare Images
-      const baseResult = await uriToBase64(currentImageUri);
-      const garmentResult = await uriToBase64(garment.image);
+      // 1. Compress and Prepare Images (this drastically reduces Gemini latency)
+      const baseResult = await compressAndGetBase64(currentImageUri);
+      const garmentResult = await compressAndGetBase64(garment.image);
 
       // 2. Call Firebase Vertex AI via direct REST to bypass React Native SDK bugs
       const projectId = app.options.projectId || 'virtual-rack';
