@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-const OCCASIONS = ['Casual', 'Corporate', 'Wedding', 'Night Out', 'Gym', 'Mixer', 'Lounge'];
+const OCCASIONS = ['Casual', 'Corporate', 'Wedding', 'Night Out', 'Gym', 'Mixer', 'Lounge', 'Swimwear'];
 const TYPES = ['top', 'bottom', 'dress'];
 
 export default function AdminUploadPage() {
@@ -135,6 +135,7 @@ export default function AdminUploadPage() {
         const itemCat = (item.category || '').toLowerCase();
         if (itemCat.includes('executive') || itemCat.includes('corporate')) garmentOccasion = 'Corporate';
         else if (itemCat.includes('athleisure') || itemCat.includes('active')) garmentOccasion = 'Gym';
+        else if (itemCat.includes('swim') || itemCat.includes('beach')) garmentOccasion = 'Swimwear';
 
         let garmentGender = item.gender || 'Men';
         if (garmentGender === 'Male') garmentGender = 'Men';

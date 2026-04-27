@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { PencilIcon, TrashIcon } from 'lucide-react'
 
-const OCCASIONS = ['Casual', 'Corporate', 'Wedding', 'Night Out', 'Gym', 'Mixer', 'Lounge'];
+const OCCASIONS = ['Casual', 'Corporate', 'Wedding', 'Night Out', 'Gym', 'Mixer', 'Lounge', 'Swimwear'];
 const TYPES = ['top', 'bottom', 'dress'];
 const GENDERS = ['Men', 'Women', 'Unisex'];
 
