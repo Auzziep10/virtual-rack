@@ -151,6 +151,7 @@ export default function TryOnScreen() {
           data={garments}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
+          style={{ width: '100%' }}
           snapToInterval={ITEM_HEIGHT}
           decelerationRate="fast"
           onScroll={Animated.event(
@@ -158,7 +159,7 @@ export default function TryOnScreen() {
             { useNativeDriver: true }
           )}
           scrollEventThrottle={16}
-          contentContainerStyle={{ paddingTop: listPadding, paddingBottom: listPadding }}
+          contentContainerStyle={{ paddingTop: listPadding, paddingBottom: listPadding, alignItems: 'center' }}
           renderItem={({ item: garment, index }) => {
             const itemPosition = index * ITEM_HEIGHT;
             
@@ -312,11 +313,10 @@ const styles = StyleSheet.create({
   },
   bubblesContainer: {
     position: 'absolute',
-    left: 5,
+    left: -5,
     bottom: 120, // Adjusted to make room for save button
-    width: 100,
+    width: 120,
     zIndex: 10,
-    alignItems: 'center', // Center the bubbles within the wider container
   },
   bubble: {
     width: 60,
@@ -330,7 +330,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
-    overflow: 'hidden',
   },
   bubbleImage: {
     width: '100%',
