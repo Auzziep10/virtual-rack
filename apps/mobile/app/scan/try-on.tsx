@@ -4,7 +4,7 @@ import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { collection, query, where, getDocs } from 'firebase/firestore';
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, app } from '@/lib/firebase';
 
 interface Garment {
@@ -74,7 +74,14 @@ export default function TryOnScreen() {
     const fileName = `tryons/img_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
     
     const storageRef = ref(storage, fileName);
-    await uploadString(storageRef, base64Str, 'data_url');
+    
+    // In React Native, Firebase's uploadString has an ArrayBuffer bug.
+    // Instead, we convert the base64 string to a native Blob using fetch, 
+    // and then upload it using uploadBytes.
+    const response = await fetch(base64Str);
+    const blob = await response.blob();
+    
+    await uploadBytes(storageRef, blob);
     return await getDownloadURL(storageRef);
   }
 
