@@ -53,15 +53,23 @@ export default function TryOnScreen() {
   }, [occasion]);
 
   async function compressAndGetBase64(uri: string): Promise<{ data: string; mimeType: string }> {
-    // 1. Compress Image using ImageManipulator
-    const manipResult = await ImageManipulator.manipulateAsync(
-      uri,
-      [{ resize: { width: 1024 } }],
-      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
-    );
+    let targetUri = uri;
 
-    // 2. Read to base64
-    const response = await fetch(manipResult.uri);
+    // ImageManipulator cannot read remote HTTP URLs directly.
+    // If it's a remote URL (like our garments in Firebase), we skip compression 
+    // since they are usually pre-optimized, or we'd need to download them locally first.
+    // We strictly want to compress the massive 4K local camera photos (file://).
+    if (!uri.startsWith('http')) {
+      const manipResult = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 1024 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      targetUri = manipResult.uri;
+    }
+
+    // Read to base64
+    const response = await fetch(targetUri);
     const blob = await response.blob();
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
