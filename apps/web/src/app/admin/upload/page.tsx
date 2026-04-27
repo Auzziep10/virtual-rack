@@ -349,7 +349,7 @@ export default function AdminUploadPage() {
             </div>
           )}
 
-          {deckItems.length > 0 && (
+          {deckItems.length > 0 ? (
             <div className="flex flex-col gap-3">
               <div className="flex justify-between items-center">
                 <Label className="text-neutral-700 font-medium">Select Items to Import</Label>
@@ -396,7 +396,12 @@ export default function AdminUploadPage() {
                 ))}
               </div>
             </div>
-          )}
+          ) : selectedDeck ? (
+            <div className="p-6 border border-dashed border-neutral-300 rounded-md bg-neutral-50 text-neutral-500 text-center text-sm flex flex-col items-center justify-center gap-2">
+              <svg xmlns="http://www.w3.org/-2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-folder-open text-neutral-400"><path d="m6 14 1.45-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.55 6a2 2 0 0 1-1.94 1.5H4a2 2 0 0 1-2-2V5c0-1.1.9-2 2-2h3.93a2 2 0 0 1 1.66.9l.82 1.2a2 2 0 0 0 1.66.9H18a2 2 0 0 1 2 2v2"/></svg>
+              <p>This deck has no items.</p>
+            </div>
+          ) : null}
 
           {importMessage && (
             <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
