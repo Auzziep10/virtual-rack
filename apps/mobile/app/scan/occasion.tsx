@@ -32,7 +32,21 @@ export default function OccasionScreen() {
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
-      <Text style={[styles.promptTitle, { top: insets.top + 120 }]}>Select an Occasion</Text>
+      <Animated.Text 
+        style={[
+          styles.promptTitle, 
+          { 
+            top: insets.top + 120,
+            opacity: scrollY.interpolate({
+              inputRange: [0, ITEM_HEIGHT / 2],
+              outputRange: [1, 0],
+              extrapolate: 'clamp',
+            })
+          }
+        ]}
+      >
+        Select an Occasion
+      </Animated.Text>
 
       <Animated.FlatList
         data={OCCASIONS}
