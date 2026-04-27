@@ -6,10 +6,12 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { collection, addDoc } from 'firebase/firestore';
 import { storage, db } from '@/lib/firebase';
-import { Alert } from 'react-native';
+import { Alert, ActivityIndicator } from 'react-native';
 
 export default function ScanningScreen() {
   const scannerRef = useRef<RoomScannerViewRef>(null);
+  const [isCapturing, setIsCapturing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     // Start the object capture session shortly after mount to ensure native view is ready
@@ -28,18 +30,27 @@ export default function ScanningScreen() {
     };
   }, []);
 
-  const handleCapture = () => {
-    if (scannerRef.current) {
+  const handleCaptureToggle = () => {
+    if (!scannerRef.current) return;
+    
+    if (!isCapturing) {
+      // Start taking photos
       scannerRef.current.startCapturing();
+      setIsCapturing(true);
+    } else {
+      // Finish capturing and trigger photogrammetry
+      setIsCapturing(false);
+      setIsProcessing(true);
+      scannerRef.current.stopSession();
     }
   };
 
   const handleModelReady = async (event: any) => {
-    const objUri = event.nativeEvent.uri;
+    const objUri = event.nativeEvent.uri || event.nativeEvent.path;
     console.log("Model ready at", objUri);
     
     try {
-      Alert.alert("Uploading", "Saving your 3D body scan...");
+      Alert.alert("Uploading", "Saving your 3D body scan to the cloud...");
       
       // Fetch the local .obj file as a Blob
       const response = await fetch(objUri);
@@ -62,10 +73,12 @@ export default function ScanningScreen() {
       console.log("Uploaded obj URL:", downloadUrl);
       
       // Return to dashboard after saving
+      setIsProcessing(false);
       router.navigate('/(tabs)');
     } catch (error) {
       console.error("Failed to upload .obj:", error);
       Alert.alert("Error", "Could not save the 3D scan.");
+      setIsProcessing(false);
       router.navigate('/(tabs)');
     }
   };
@@ -84,15 +97,29 @@ export default function ScanningScreen() {
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
+      {/* Processing Overlay */}
+      {isProcessing && (
+        <View style={styles.processingOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={styles.processingText}>Processing 3D Model...</Text>
+          <Text style={styles.processingSub}>This may take a few minutes depending on the device.</Text>
+        </View>
+      )}
+
       {/* Controls Container */}
       <View style={styles.controlsContainer}>
         <View style={{ width: 80 }} />
 
         <TouchableOpacity 
-          style={styles.captureButton}
-          onPress={handleCapture}
+          style={[styles.captureButton, isCapturing && { backgroundColor: '#ff3b30' }]}
+          onPress={handleCaptureToggle}
+          disabled={isProcessing}
         >
-          <IconSymbol name="camera.viewfinder" size={32} color="#fff" />
+          {isCapturing ? (
+            <IconSymbol name="checkmark" size={32} color="#fff" />
+          ) : (
+            <IconSymbol name="camera.viewfinder" size={32} color="#fff" />
+          )}
         </TouchableOpacity>
         
         <View style={{ width: 80 }} />
@@ -162,5 +189,25 @@ const styles = StyleSheet.create({
     borderColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  processingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.85)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 20,
+  },
+  processingText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 20,
+  },
+  processingSub: {
+    color: '#aaa',
+    fontSize: 14,
+    marginTop: 8,
+    textAlign: 'center',
+    paddingHorizontal: 40,
   },
 });
