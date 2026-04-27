@@ -12,6 +12,7 @@ export default function ScanningScreen() {
   const scannerRef = useRef<RoomScannerViewRef>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [processingProgress, setProcessingProgress] = useState(0);
 
   useEffect(() => {
     // Start the object capture session shortly after mount to ensure native view is ready
@@ -41,8 +42,14 @@ export default function ScanningScreen() {
       // Finish capturing and trigger photogrammetry
       setIsCapturing(false);
       setIsProcessing(true);
+      setProcessingProgress(0);
       scannerRef.current.stopSession();
     }
+  };
+
+  const handleProgress = (event: any) => {
+    // Progress comes in as a fraction 0.0 to 1.0 from iOS PhotogrammetrySession
+    setProcessingProgress(event.nativeEvent.progress);
   };
 
   const handleModelReady = async (event: any) => {
@@ -89,6 +96,7 @@ export default function ScanningScreen() {
         ref={scannerRef} 
         style={styles.scanner} 
         onModelReady={handleModelReady}
+        onProgress={handleProgress}
       />
       
       {/* Top Bar */}
@@ -100,8 +108,18 @@ export default function ScanningScreen() {
       {/* Processing Overlay */}
       {isProcessing && (
         <View style={styles.processingOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.processingText}>Processing 3D Model...</Text>
+          {processingProgress > 0 ? (
+            <View style={styles.progressBarContainer}>
+              <View style={[styles.progressBarFill, { width: `${Math.max(5, processingProgress * 100)}%` }]} />
+            </View>
+          ) : (
+            <ActivityIndicator size="large" color="#fff" />
+          )}
+          <Text style={styles.processingText}>
+            {processingProgress > 0 
+              ? `Processing 3D Model... ${Math.round(processingProgress * 100)}%` 
+              : "Preparing Photogrammetry..."}
+          </Text>
           <Text style={styles.processingSub}>This may take a few minutes depending on the device.</Text>
         </View>
       )}
@@ -209,5 +227,18 @@ const styles = StyleSheet.create({
     marginTop: 8,
     textAlign: 'center',
     paddingHorizontal: 40,
+  },
+  progressBarContainer: {
+    width: '70%',
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginTop: 10,
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 4,
   },
 });
