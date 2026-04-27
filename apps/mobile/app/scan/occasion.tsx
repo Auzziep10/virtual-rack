@@ -35,7 +35,6 @@ export default function OccasionScreen() {
           style={styles.logoImage} 
           resizeMode="contain" 
         />
-        <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
       {/* Back Button */}

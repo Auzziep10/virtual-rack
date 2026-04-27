@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Animated } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -22,6 +22,7 @@ export default function TryOnScreen() {
   const occasion = params.occasion || 'Casual';
   const imageUri = params.imageUri as string | undefined;
   const insets = useSafeAreaInsets();
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const [currentImageUri, setCurrentImageUri] = useState<string | undefined>(imageUri);
   const [garments, setGarments] = useState<Garment[]>([]);
@@ -152,7 +153,6 @@ export default function TryOnScreen() {
           style={styles.logoImage} 
           resizeMode="contain" 
         />
-        <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
       {/* Back Button */}
@@ -172,34 +172,73 @@ export default function TryOnScreen() {
       </TouchableOpacity>
 
       {/* Garment Bubbles */}
-      <View style={[styles.bubblesContainer, { marginTop: insets.top + 100 }]}>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {garments.map((garment) => {
+      <View style={[styles.bubblesContainer, { marginTop: insets.top + 100, zIndex: 5 }]}>
+        <Animated.FlatList
+          data={garments}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
+          contentContainerStyle={{ paddingVertical: 60 }} // padding so top/bottom items can reach middle
+          renderItem={({ item: garment, index }) => {
+            const ITEM_HEIGHT = 80; // 60 height + 20 marginBottom
+            const itemPosition = index * ITEM_HEIGHT;
+            
+            // Fade out when scrolling up (past top) or down (past bottom)
+            // The visible window is roughly 500px tall
+            const opacity = scrollY.interpolate({
+              inputRange: [
+                itemPosition - 400, // item is far above
+                itemPosition - 300, // item entering from top
+                itemPosition,       // item at top of scroll
+                itemPosition + 200, // item near bottom
+                itemPosition + 300  // item far below
+              ],
+              outputRange: [0, 1, 1, 1, 0],
+              extrapolate: 'clamp',
+            });
+
+            const scale = scrollY.interpolate({
+              inputRange: [
+                itemPosition - 400,
+                itemPosition - 300,
+                itemPosition,
+                itemPosition + 200,
+                itemPosition + 300
+              ],
+              outputRange: [0.8, 1, 1, 1, 0.8],
+              extrapolate: 'clamp',
+            });
+
             const isSelected = selectedGarment?.id === garment.id;
             return (
-              <TouchableOpacity
-                key={garment.id}
-                style={[
-                  styles.bubble,
-                  isSelected && styles.bubbleSelected,
-                  { backgroundColor: '#f0f0f0' } // use a solid background for the image to sit on
-                ]}
-                onPress={() => handleGarmentSelect(garment)}
-                disabled={isGenerating}
-              >
-                {garment.image ? (
-                  <Image 
-                    source={{ uri: garment.image }} 
-                    style={styles.bubbleImage} 
-                    resizeMode="cover" 
-                  />
-                ) : (
-                  <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
-                )}
-              </TouchableOpacity>
+              <Animated.View style={{ opacity, transform: [{ scale }] }}>
+                <TouchableOpacity
+                  style={[
+                    styles.bubble,
+                    isSelected && styles.bubbleSelected,
+                    { backgroundColor: '#f0f0f0' }
+                  ]}
+                  onPress={() => handleGarmentSelect(garment)}
+                  disabled={isGenerating}
+                >
+                  {garment.image ? (
+                    <Image 
+                      source={{ uri: garment.image }} 
+                      style={styles.bubbleImage} 
+                      resizeMode="cover" 
+                    />
+                  ) : (
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
+                  )}
+                </TouchableOpacity>
+              </Animated.View>
             );
-          })}
-        </ScrollView>
+          }}
+        />
       </View>
 
       {/* Redo Button */}

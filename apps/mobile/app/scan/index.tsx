@@ -107,7 +107,6 @@ export default function ScanningScreen() {
           style={[styles.logoImage, { tintColor: '#fff' }]} 
           resizeMode="contain" 
         />
-        <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
       {/* Back Button */}
