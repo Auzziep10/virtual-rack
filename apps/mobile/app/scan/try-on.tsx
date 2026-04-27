@@ -337,9 +337,11 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   bubbleSelected: {
-    borderWidth: 4,
-    borderColor: '#8a2be2',
-    transform: [{ scale: 1.1 }],
+    shadowColor: '#fff',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 1,
+    shadowRadius: 15,
+    elevation: 10,
   },
   redoButton: {
     position: 'absolute',
