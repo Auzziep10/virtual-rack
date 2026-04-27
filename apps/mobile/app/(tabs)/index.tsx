@@ -8,7 +8,7 @@ import { router, useFocusEffect } from 'expo-router';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import RoomScannerModule from '../../modules/room-scanner';
 
 const { width } = Dimensions.get('window');
