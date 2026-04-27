@@ -1,5 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
 import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -15,8 +16,9 @@ const firebaseConfig = {
 // Initialize Firebase only if it hasn't been initialized already
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// Get a reference to the storage service
+// Get references to Firebase services
 export const storage = getStorage(app);
+export const db = getFirestore(app);
 
 // Initialize Analytics conditionally (only runs on client side)
 export const analytics = typeof window !== 'undefined' ? isSupported().then(yes => yes ? getAnalytics(app) : null) : null;
