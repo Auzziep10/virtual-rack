@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { collection, addDoc } from 'firebase/firestore'
 import { storage, db } from '@/lib/firebase'
@@ -162,7 +163,14 @@ export default function AdminUploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 p-8 flex flex-col items-center justify-center font-sans text-neutral-50 gap-8 py-16">
+    <div className="min-h-screen bg-neutral-950 p-8 flex flex-col items-center font-sans text-neutral-50 gap-8 py-16">
+      <div className="w-full max-w-lg flex justify-between items-center">
+        <h1 className="text-2xl font-bold tracking-tight text-white">Portal Dashboard</h1>
+        <Link href="/admin/garments" className="text-sm text-neutral-400 hover:text-white hover:underline underline-offset-4 transition-all">
+          View All Garments →
+        </Link>
+      </div>
+      
       <Card className="w-full max-w-lg bg-neutral-900 border-neutral-800 shadow-2xl text-white">
         <CardHeader>
           <CardTitle className="text-xl tracking-wide">Garment Upload Portal</CardTitle>
