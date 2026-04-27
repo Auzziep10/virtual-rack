@@ -6,6 +6,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, app } from '@/lib/firebase';
+import * as ImagePicker from 'expo-image-picker';
 
 interface Garment {
   id: string;
@@ -22,6 +23,7 @@ export default function TryOnScreen() {
   const imageUri = params.imageUri as string | undefined;
   const insets = useSafeAreaInsets();
 
+  const [currentImageUri, setCurrentImageUri] = useState<string | undefined>(imageUri);
   const [garments, setGarments] = useState<Garment[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedGarment, setSelectedGarment] = useState<Garment | null>(null);
@@ -88,7 +90,7 @@ export default function TryOnScreen() {
   const handleGarmentSelect = async (garment: Garment) => {
     setSelectedGarment(garment);
     
-    if (!imageUri || !garment.image) {
+    if (!currentImageUri || !garment.image) {
       Alert.alert("Missing Media", "Make sure you took a photo and selected a garment.");
       return;
     }
@@ -98,7 +100,7 @@ export default function TryOnScreen() {
 
     try {
       // 1. Prepare Images
-      const baseResult = await uriToBase64(imageUri);
+      const baseResult = await uriToBase64(currentImageUri);
       const garmentResult = await uriToBase64(garment.image);
 
       // 2. Call Firebase Vertex AI via direct REST to bypass React Native SDK bugs
@@ -183,9 +185,53 @@ export default function TryOnScreen() {
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#e8d8c8' }]}>
         {resultImage ? (
           <Image source={{ uri: resultImage }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        ) : imageUri ? (
-          <Image source={{ uri: imageUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
-        ) : null}
+        ) : currentImageUri ? (
+          <Image source={{ uri: currentImageUri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+        ) : (
+          <View style={styles.photoPickerContainer}>
+            <TouchableOpacity 
+              style={styles.photoPickerButton}
+              onPress={async () => {
+                const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+                if (permissionResult.granted === false) {
+                  alert("You've refused to allow this app to access your photos!");
+                  return;
+                }
+                const result = await ImagePicker.launchImageLibraryAsync({
+                  mediaTypes: ['images'],
+                  quality: 1,
+                });
+                if (!result.canceled) {
+                  setCurrentImageUri(result.assets[0].uri);
+                }
+              }}
+            >
+              <IconSymbol name="photo.on.rectangle" size={40} color="#000" />
+              <Text style={styles.photoPickerText}>Choose from Library</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={[styles.photoPickerButton, { marginTop: 20 }]}
+              onPress={async () => {
+                const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+                if (permissionResult.granted === false) {
+                  alert("You've refused to allow this app to access your camera!");
+                  return;
+                }
+                const result = await ImagePicker.launchCameraAsync({
+                  mediaTypes: ['images'],
+                  quality: 1,
+                });
+                if (!result.canceled) {
+                  setCurrentImageUri(result.assets[0].uri);
+                }
+              }}
+            >
+              <IconSymbol name="camera" size={40} color="#000" />
+              <Text style={styles.photoPickerText}>Take a Photo</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Loading Overlays */}
         {loading && (
@@ -373,5 +419,29 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+  },
+  photoPickerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  photoPickerButton: {
+    backgroundColor: '#fff',
+    padding: 24,
+    borderRadius: 20,
+    alignItems: 'center',
+    width: 200,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
+  },
+  photoPickerText: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
   },
 });

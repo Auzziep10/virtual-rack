@@ -75,24 +75,11 @@ export default function DashboardScreen() {
           <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: '#8a2be2' }]}
             activeOpacity={0.8}
-            onPress={async () => {
-              const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-              if (permissionResult.granted === false) {
-                alert("You've refused to allow this app to access your camera!");
-                return;
-              }
-              const result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ['images'],
-                quality: 1,
-              });
-              if (!result.canceled) {
-                router.push({ pathname: '/scan/occasion', params: { imageUri: result.assets[0].uri } });
-              }
-            }}
+            onPress={() => router.push('/scan/occasion')}
           >
             <IconSymbol name="tshirt.fill" size={28} color="#fff" style={{ marginBottom: 12 }} />
             <Text style={styles.actionButtonTitle}>Virtual Try-On</Text>
-            <Text style={styles.actionButtonSubtitle}>2D Photo</Text>
+            <Text style={styles.actionButtonSubtitle}>Select Occasion</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 
