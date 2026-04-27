@@ -18,6 +18,9 @@ export default function AdminGarmentsPage() {
   const [garments, setGarments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const [sortBy, setSortBy] = useState('newest')
+
   const [editGarment, setEditGarment] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
 
@@ -96,6 +99,23 @@ export default function AdminGarmentsPage() {
     }
   }
 
+  const filteredAndSortedGarments = garments.filter(g => 
+    (g.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+    (g.type || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (g.occasion || '').toLowerCase().includes(searchQuery.toLowerCase())
+  ).sort((a, b) => {
+    if (sortBy === 'newest') {
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+    } else if (sortBy === 'oldest') {
+      return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+    } else if (sortBy === 'nameAsc') {
+      return (a.name || '').localeCompare(b.name || '');
+    } else if (sortBy === 'nameDesc') {
+      return (b.name || '').localeCompare(a.name || '');
+    }
+    return 0;
+  });
+
   return (
     <div className="min-h-screen bg-neutral-50 p-8 text-neutral-900 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
@@ -112,11 +132,30 @@ export default function AdminGarmentsPage() {
           </div>
         </div>
 
+        <div className="flex flex-col sm:flex-row gap-4">
+          <Input 
+            placeholder="Search garments by name, type, or occasion..." 
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="flex-1 bg-white border-neutral-300 text-neutral-900 focus-visible:ring-neutral-400"
+          />
+          <select 
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 min-w-[150px]"
+          >
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="nameAsc">Name A-Z</option>
+            <option value="nameDesc">Name Z-A</option>
+          </select>
+        </div>
+
         {loading ? (
           <div className="text-neutral-500">Loading garments...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {garments.map(g => (
+            {filteredAndSortedGarments.map(g => (
               <Card key={g.id} className="bg-white border-neutral-200 flex flex-col overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
                 <div className="aspect-square w-full bg-neutral-100 relative overflow-hidden">
                   {g.image ? (
@@ -151,7 +190,7 @@ export default function AdminGarmentsPage() {
                 </CardContent>
               </Card>
             ))}
-            {garments.length === 0 && <p className="text-neutral-500 col-span-full">No garments found in database.</p>}
+            {filteredAndSortedGarments.length === 0 && <p className="text-neutral-500 col-span-full">No garments found.</p>}
           </div>
         )}
       </div>
