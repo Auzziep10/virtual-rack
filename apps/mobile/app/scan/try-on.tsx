@@ -262,7 +262,8 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    left: 30,
+    width: '100%',
+    alignItems: 'center',
     zIndex: 10,
   },
   logo: {

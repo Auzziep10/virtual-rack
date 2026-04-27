@@ -175,7 +175,8 @@ const styles = StyleSheet.create({
   },
   topBar: {
     position: 'absolute',
-    left: 30,
+    width: '100%',
+    alignItems: 'center',
     zIndex: 10,
   },
   logo: {
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: 'absolute',
-    right: 30, // Aligning to the right to balance the WOVN logo on the left
+    left: 20,
     zIndex: 10,
     width: 40,
     height: 40,
