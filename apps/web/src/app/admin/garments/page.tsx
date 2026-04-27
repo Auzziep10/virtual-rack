@@ -12,7 +12,7 @@ import { PencilIcon, TrashIcon } from 'lucide-react'
 
 const OCCASIONS = ['Casual', 'Corporate', 'Wedding', 'Night Out', 'Gym', 'Mixer', 'Lounge'];
 const TYPES = ['top', 'bottom', 'dress'];
-const GENDERS = ['Male', 'Female'];
+const GENDERS = ['Men', 'Women', 'Unisex'];
 
 export default function AdminGarmentsPage() {
   const [garments, setGarments] = useState<any[]>([])

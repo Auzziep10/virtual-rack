@@ -19,7 +19,7 @@ export default function AdminUploadPage() {
   const [type, setType] = useState('top')
   const [occasion, setOccasion] = useState('Casual')
   const [colorHex, setColorHex] = useState('#ffffff')
-  const [gender, setGender] = useState('Male')
+  const [gender, setGender] = useState('Men')
   
   const [progress, setProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
@@ -136,9 +136,11 @@ export default function AdminUploadPage() {
         if (itemCat.includes('executive') || itemCat.includes('corporate')) garmentOccasion = 'Corporate';
         else if (itemCat.includes('athleisure') || itemCat.includes('active')) garmentOccasion = 'Gym';
 
-        let garmentGender = item.gender || 'Male';
-        if (garmentGender !== 'Male' && garmentGender !== 'Female') {
-          garmentGender = 'Male';
+        let garmentGender = item.gender || 'Men';
+        if (garmentGender === 'Male') garmentGender = 'Men';
+        if (garmentGender === 'Female') garmentGender = 'Women';
+        if (garmentGender !== 'Men' && garmentGender !== 'Women' && garmentGender !== 'Unisex') {
+          garmentGender = 'Men';
         }
 
         await addDoc(collection(db, 'garments'), {
@@ -231,8 +233,9 @@ export default function AdminUploadPage() {
                 onChange={(e) => setGender(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
               >
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
+                <option value="Men">Men</option>
+                <option value="Women">Women</option>
+                <option value="Unisex">Unisex</option>
               </select>
             </div>
 
