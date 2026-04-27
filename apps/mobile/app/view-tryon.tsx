@@ -7,7 +7,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function ViewTryOnScreen() {
   const params = useLocalSearchParams();
-  const uri = params.uri ? decodeURIComponent(params.uri as string) : null;
+  const uri = params.uri as string;
   const garmentName = params.garmentName as string || 'Try-On Result';
   const insets = useSafeAreaInsets();
 
@@ -15,15 +15,7 @@ export default function ViewTryOnScreen() {
     <View style={styles.container}>
       {uri ? (
         <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="contain" />
-      ) : (
-        <Text style={{ color: 'red', marginTop: 100, textAlign: 'center' }}>No URI provided</Text>
-      )}
-      
-      {/* DEBUG TEXT - REMOVE LATER */}
-      <View style={{ position: 'absolute', top: 100, left: 20, right: 20, zIndex: 100, backgroundColor: 'rgba(0,0,0,0.8)', padding: 10 }}>
-        <Text style={{ color: 'yellow', fontSize: 10 }}>URI: {uri}</Text>
-        <Text style={{ color: 'yellow', fontSize: 10 }}>Raw Param: {params.uri}</Text>
-      </View>
+      ) : null}
 
       {/* Top Bar Area */}
       <View style={[styles.topBar, { top: insets.top + 20 }]}>
