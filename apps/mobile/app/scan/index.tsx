@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions, Platform } from 'react-native';
 import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -101,8 +101,12 @@ export default function ScanningScreen() {
       />
       
       {/* Top Bar */}
-      <View style={[styles.topBar, { top: insets?.top ? insets.top + 20 : 40 }]}>
-        <Text style={styles.logo}>WOVN</Text>
+      <View style={[styles.topBar, { top: insets.top + 20 }]}>
+        <Image 
+          source={require('../../assets/images/wovn-logo.png')} 
+          style={[styles.logoImage, { tintColor: '#fff' }]} 
+          resizeMode="contain" 
+        />
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
@@ -172,10 +176,15 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   logo: {
-    color: '#fff',
+    color: '#000',
     fontSize: 28,
     fontWeight: '300',
     letterSpacing: 3,
+  },
+  logoImage: {
+    width: 120,
+    height: 34,
+    marginBottom: 4,
   },
   logoSub: {
     color: '#fff',

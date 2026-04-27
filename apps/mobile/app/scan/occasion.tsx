@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Image } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,7 +30,11 @@ export default function OccasionScreen() {
     <View style={[styles.container, { backgroundColor: '#fafafa' }]}>
       {/* Top Bar */}
       <View style={[styles.topBar, { top: insets.top + 20 }]}>
-        <Text style={styles.logo}>WOVN</Text>
+        <Image 
+          source={require('../../assets/images/wovn-logo.png')} 
+          style={styles.logoImage} 
+          resizeMode="contain" 
+        />
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
@@ -159,6 +163,11 @@ const styles = StyleSheet.create({
     fontWeight: '300',
     letterSpacing: 3,
   },
+  logoImage: {
+    width: 120,
+    height: 34,
+    marginBottom: 4,
+  },
   logoSub: {
     color: '#000',
     fontSize: 12,
@@ -207,5 +216,33 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: 'rgba(0,0,0,0.05)',
     zIndex: -1,
+  },
+  genderToggle: {
+    position: 'absolute',
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    zIndex: 10,
+  },
+  genderOption: {
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+  },
+  genderOptionActive: {
+    backgroundColor: '#000',
+    borderColor: '#000',
+  },
+  genderText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  genderTextActive: {
+    color: '#fff',
   },
 });

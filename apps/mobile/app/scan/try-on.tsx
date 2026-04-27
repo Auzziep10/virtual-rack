@@ -147,7 +147,11 @@ export default function TryOnScreen() {
 
       {/* Top Bar */}
       <View style={[styles.topBar, { top: insets.top + 20 }]}>
-        <Text style={styles.logo}>WOVN</Text>
+        <Image 
+          source={require('../../assets/images/wovn-logo.png')} 
+          style={styles.logoImage} 
+          resizeMode="contain" 
+        />
         <Text style={styles.logoSub}>STUDIO</Text>
       </View>
 
@@ -227,6 +231,11 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '300',
     letterSpacing: 3,
+  },
+  logoImage: {
+    width: 120,
+    height: 34,
+    marginBottom: 4,
   },
   logoSub: {
     color: '#000',

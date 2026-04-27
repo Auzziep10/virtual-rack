@@ -64,7 +64,11 @@ export default function DashboardScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.greeting}>Welcome back,</Text>
-            <Text style={styles.title}>WOVN</Text>
+            <Image 
+              source={require('../../assets/images/wovn-logo.png')} 
+              style={styles.logoImage} 
+              resizeMode="contain" 
+            />
           </View>
           <View style={styles.avatarContainer}>
             <IconSymbol name="person.fill" size={24} color="#000" />
@@ -185,6 +189,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#111',
     letterSpacing: -1,
+  },
+  logoImage: {
+    width: 140,
+    height: 40,
+    marginTop: 4,
   },
   avatarContainer: {
     width: 48,
