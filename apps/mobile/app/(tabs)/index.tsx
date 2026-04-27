@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, Image, ActivityIndicator } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -8,6 +8,8 @@ import { router, useFocusEffect } from 'expo-router';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
+import * as FileSystem from 'expo-file-system';
+import RoomScannerModule from '../../modules/room-scanner';
 
 const { width } = Dimensions.get('window');
 
@@ -50,6 +52,30 @@ export default function DashboardScreen() {
       fetchScans();
     }, [])
   );
+
+  const [downloadingScan, setDownloadingScan] = useState<string | null>(null);
+
+  const handleScanPress = async (scan: any) => {
+    if (!scan.objUrl) return;
+    
+    setDownloadingScan(scan.id);
+    try {
+      const fileExt = scan.objUrl.includes('.usdz') ? '.usdz' : '.obj';
+      const localUri = FileSystem.cacheDirectory + `scan_${scan.id}${fileExt}`;
+      
+      const fileInfo = await FileSystem.getInfoAsync(localUri);
+      if (!fileInfo.exists) {
+        await FileSystem.downloadAsync(scan.objUrl, localUri);
+      }
+      
+      await RoomScannerModule.previewModel(localUri);
+    } catch (error) {
+      console.error('Error previewing scan:', error);
+      alert('Failed to load 3D scan. Please try again.');
+    } finally {
+      setDownloadingScan(null);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -105,15 +131,24 @@ export default function DashboardScreen() {
         <View style={styles.grid}>
           {scans.length > 0 ? (
             scans.map((item, index) => (
-              <View key={item.id} style={styles.card}>
+              <TouchableOpacity 
+                key={item.id} 
+                style={styles.card}
+                activeOpacity={0.8}
+                onPress={() => handleScanPress(item)}
+              >
                 <View style={styles.cardImagePlaceholder}>
-                  <IconSymbol name="cube.transparent" size={40} color="#8a2be2" />
+                  {downloadingScan === item.id ? (
+                    <ActivityIndicator size="small" color="#8a2be2" />
+                  ) : (
+                    <IconSymbol name="cube.transparent" size={40} color="#8a2be2" />
+                  )}
                 </View>
                 <Text style={styles.cardTitle}>Body Scan {scans.length - index}</Text>
                 <Text style={styles.cardDate}>
                   {new Date(item.createdAt).toLocaleDateString()}
                 </Text>
-              </View>
+              </TouchableOpacity>
             ))
           ) : (
             <View style={[styles.card, { width: '100%' }]}>

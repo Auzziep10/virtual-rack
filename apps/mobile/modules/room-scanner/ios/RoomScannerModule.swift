@@ -1,4 +1,5 @@
 import ExpoModulesCore
+import QuickLook
 
 @available(iOS 17.0, *)
 public class RoomScannerModule: Module {
@@ -36,5 +37,37 @@ public class RoomScannerModule: Module {
           view.stopSession()
       }
     }
+
+    AsyncFunction("previewModel") { (url: String) in
+      DispatchQueue.main.async {
+        if let fileUrl = URL(string: url) {
+          let previewController = QLPreviewController()
+          let dataSource = QuickLookDataSource(url: fileUrl)
+          previewController.dataSource = dataSource
+          
+          objc_setAssociatedObject(previewController, "dataSource", dataSource, .OBJC_ASSOCIATION_RETAIN)
+          
+          if let rootViewController = UIApplication.shared.keyWindow?.rootViewController {
+            rootViewController.present(previewController, animated: true, completion: nil)
+          }
+        }
+      }
+    }
+  }
+}
+
+class QuickLookDataSource: NSObject, QLPreviewControllerDataSource {
+  let url: URL
+
+  init(url: URL) {
+    self.url = url
+  }
+
+  func numberOfPreviewItems(in controller: QLPreviewController) -> Int {
+    return 1
+  }
+
+  func previewController(_ controller: QLPreviewController, previewItemAt index: Int) -> QLPreviewItem {
+    return url as QLPreviewItem
   }
 }

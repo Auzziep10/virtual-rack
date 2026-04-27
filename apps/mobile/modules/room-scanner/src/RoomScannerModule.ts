@@ -1,3 +1,9 @@
-import { NativeModule, requireNativeModule } from 'expo';
+import { requireNativeModule } from 'expo-modules-core';
 
-export default requireNativeModule('RoomScanner');
+const NativeModule = requireNativeModule('RoomScanner');
+
+export default NativeModule;
+
+export const previewModel = async (url: string) => {
+  return await NativeModule.previewModel(url);
+};
