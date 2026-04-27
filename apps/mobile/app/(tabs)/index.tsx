@@ -8,7 +8,6 @@ import { router, useFocusEffect } from 'expo-router';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system/legacy';
 import { previewModel } from '../../modules/room-scanner';
 
 const { width } = Dimensions.get('window');
@@ -60,14 +59,7 @@ export default function DashboardScreen() {
     
     setDownloadingScan(scan.id);
     try {
-      const fileExt = scan.objUrl.includes('.usdz') ? '.usdz' : '.obj';
-      const localUri = FileSystem.cacheDirectory + `scan_${scan.id}${fileExt}`;
-      
-      const fileInfo = await FileSystem.getInfoAsync(localUri);
-      if (!fileInfo.exists) {
-        await FileSystem.downloadAsync(scan.objUrl, localUri);
-      }
-      await previewModel(localUri);
+      await previewModel(scan.objUrl);
     } catch (error) {
       console.error('Error previewing scan:', error);
       alert('Failed to load 3D scan. Please try again.');
