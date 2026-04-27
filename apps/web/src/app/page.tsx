@@ -1,8 +1,7 @@
 import React from 'react';
 import ClientStage from '@/components/VirtualRack/ClientStage';
-import { prisma } from '@/lib/prisma';
 
-// Define the Garment type based on our Prisma schema
+// Define the Garment type based on our Firebase schema
 type Garment = {
   id: string;
   name: string;
@@ -12,36 +11,12 @@ type Garment = {
   assetUsdzUrl: string | null;
 };
 
-// Fetch real garments from the PostgreSQL database
-async function getGarments(): Promise<Garment[]> {
-  try {
-    const garments = await prisma.garment.findMany({
-      take: 10,
-      orderBy: { createdAt: 'desc' },
-    });
-    return garments;
-  } catch (error) {
-    console.error("Failed to fetch garments:", error);
-    return [];
-  }
-}
+export default function VirtualRackPage() {
+  const userId = 'user-123';
 
-async function getUser() {
-  try {
-    return await prisma.user.findFirst();
-  } catch (error) {
-    console.error("Failed to fetch user:", error);
-    return null;
-  }
-}
-
-export default async function VirtualRackPage() {
-  const garments = await getGarments();
-  const user = await getUser();
-  const userId = user?.id || 'user-123';
-
-  // If no garments exist yet, fallback to a placeholder list for the UI layout
-  const displayGarments = garments.length > 0 ? garments : [
+  // We are using Firebase now instead of Prisma.
+  // Display placeholders for the UI Layout.
+  const displayGarments = [
     { id: 'placeholder-1', name: 'Velvet Gala Gown', occasionTags: ['Gala'], assetGlbUrl: null },
     { id: 'placeholder-2', name: 'Silk Resort Shirt', occasionTags: ['Beach', 'Resort'], assetGlbUrl: null },
   ];
