@@ -44,9 +44,9 @@ export default function OccasionScreen() {
     fetchOccasions();
   }, []);
 
-  // Calculate padding so first and last items can be centered
+  // Calculate padding so first and last items can be centered exactly
   const halfScreen = SCREEN_HEIGHT / 2;
-  const listPadding = halfScreen - (ITEM_HEIGHT / 2) - 40; // 40 is a slight offset for visual balance
+  const listPadding = halfScreen - (ITEM_HEIGHT / 2);
 
   return (
     <View style={[styles.container, { backgroundColor: '#fafafa' }]}>

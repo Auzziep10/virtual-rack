@@ -41,17 +41,20 @@ export default function TryOnScreen() {
   useEffect(() => {
     async function fetchGarments() {
       try {
-        const q = query(
-          collection(db, 'garments'), 
-          where('occasion', '==', occasion),
-          where('gender', '==', gender)
-        );
+        const q = query(collection(db, 'garments'), where('occasion', '==', occasion));
         const querySnapshot = await getDocs(q);
         const fetched = querySnapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         })) as Garment[];
-        setGarments(fetched);
+        
+        // Filter in JS to handle case-insensitivity and older garments without gender
+        const filtered = fetched.filter(g => {
+          const garmentGender = (g as any).gender?.toLowerCase() || 'men';
+          return garmentGender === gender.toLowerCase();
+        });
+        
+        setGarments(filtered);
       } catch (error) {
         console.error("Error fetching garments:", error);
       } finally {
