@@ -1,7 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getStorage } from "firebase/storage";
 import { getFirestore } from "firebase/firestore";
-import { getAI } from "firebase/ai";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCvf0LN7I44_wmtqqCJWM0glwOhck3tZy4",
@@ -14,9 +13,8 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only if it hasn't been initialized already
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+export const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 // Get references to Firebase services
 export const storage = getStorage(app);
 export const db = getFirestore(app);
-export const ai = getAI(app);

@@ -5,8 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
-import { getGenerativeModel } from 'firebase/ai';
-import { db, ai, storage } from '@/lib/firebase';
+import { db, storage, app } from '@/lib/firebase';
 
 interface Garment {
   id: string;
@@ -88,27 +87,63 @@ export default function TryOnScreen() {
     }
 
     setIsGenerating(true);
-    setResultImage(null); // Clear previous result
+    setResultImage(null);
 
     try {
       // 1. Prepare Images
       const baseResult = await uriToBase64(imageUri);
       const garmentResult = await uriToBase64(garment.image);
 
-      // 2. Call Gemini
-      const model = getGenerativeModel(ai, { model: "gemini-2.5-flash-image" });
+      // 2. Call Firebase Vertex AI via direct REST to bypass React Native SDK bugs
+      const projectId = app.options.projectId || 'virtual-rack';
+      const apiKey = app.options.apiKey;
+      const model = 'gemini-2.5-flash-image';
       
-      const parts: any[] = [
-        { text: "TASK: Virtual Try-On.\nCRITICAL CONSTRAINTS:\n1. Apply the garment in the SECOND image to the person in the FIRST image realistically.\n2. Keep the exact background, face, and pose of the person in the FIRST image perfectly intact.\n3. Ensure the lighting and fabric textures match the environment." },
-        { inlineData: { data: baseResult.data, mimeType: baseResult.mimeType } },
-        { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
-      ];
+      const endpoint = `https://firebasevertexai.googleapis.com/v1beta/projects/${projectId}/locations/us-central1/publishers/google/models/${model}:generateContent`;
 
-      const result = await model.generateContent(parts);
-      const response = result.response;
-      const candidates = response.candidates;
-      
+      const payload = {
+        contents: [
+          {
+            role: "user",
+            parts: [
+              { text: "TASK: Virtual Try-On.\nCRITICAL CONSTRAINTS:\n1. Apply the garment in the SECOND image to the person in the FIRST image realistically.\n2. Keep the exact background, face, and pose of the person in the FIRST image perfectly intact.\n3. Ensure the lighting and fabric textures match the environment." },
+              { inlineData: { data: baseResult.data, mimeType: baseResult.mimeType } },
+              { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
+            ]
+          }
+        ]
+      };
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-goog-api-client': 'fire/12.12.1',
+          'x-goog-api-key': apiKey as string,
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        // Log detailed error from Firebase Vertex AI
+        console.error("Vertex AI API Error:", result.error);
+        
+        if (result.error?.message?.includes("has not been used in project")) {
+          Alert.alert(
+            "API Disabled", 
+            "You need to enable 'Vertex AI in Firebase' in your Firebase Console for the 'virtual-rack' project."
+          );
+        } else {
+          Alert.alert("Generation Error", result.error?.message || "Unknown error occurred");
+        }
+        throw new Error(result.error?.message);
+      }
+
+      const candidates = result.candidates;
       let base64Output = null;
+      
       if (candidates && candidates.length > 0) {
         for (const part of candidates[0].content?.parts || []) {
           if (part.inlineData) {
@@ -129,8 +164,7 @@ export default function TryOnScreen() {
 
     } catch (error) {
       console.error("AI Try-On Error:", error);
-      Alert.alert("Try-On Failed", "Could not generate the image right now. Please try again.");
-      setSelectedGarment(null); // Revert selection on failure
+      setSelectedGarment(null);
     } finally {
       setIsGenerating(false);
     }
