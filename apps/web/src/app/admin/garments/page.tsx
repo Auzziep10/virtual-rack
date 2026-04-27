@@ -71,6 +71,31 @@ export default function AdminGarmentsPage() {
     }
   }
 
+  const fixLegacyGenders = async () => {
+    setIsSaving(true);
+    let count = 0;
+    try {
+      for (const g of garments) {
+        if (g.gender === 'Male' || g.gender === 'Female') {
+          const newGender = g.gender === 'Male' ? 'Men' : 'Women';
+          await updateDoc(doc(db, 'garments', g.id), { gender: newGender });
+          count++;
+        }
+      }
+      if (count > 0) {
+        alert(`Fixed ${count} legacy garment genders!`);
+        await fetchGarments();
+      } else {
+        alert("All garments are already up to date.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to fix legacy genders.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-neutral-50 p-8 text-neutral-900 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
@@ -79,7 +104,12 @@ export default function AdminGarmentsPage() {
             <h1 className="text-3xl font-bold tracking-tight text-neutral-900 mb-2">Garment Inventory</h1>
             <p className="text-neutral-500">Manage all uploaded and imported garments here.</p>
           </div>
-          <Button onClick={fetchGarments} variant="outline" className="bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-100">Refresh List</Button>
+          <div className="flex gap-4">
+            <Button onClick={fixLegacyGenders} disabled={isSaving} variant="outline" className="bg-white text-blue-600 border-blue-200 hover:bg-blue-50">
+              Fix Legacy Genders
+            </Button>
+            <Button onClick={fetchGarments} variant="outline" className="bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-100">Refresh List</Button>
+          </div>
         </div>
 
         {loading ? (
