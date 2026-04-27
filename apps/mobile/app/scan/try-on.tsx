@@ -115,7 +115,7 @@ export default function TryOnScreen() {
           {
             role: "user",
             parts: [
-              { text: "TASK: Virtual Try-On.\nCRITICAL CONSTRAINTS:\n1. Apply the garment in the SECOND image to the person in the FIRST image realistically.\n2. Keep the exact background, face, and pose of the person in the FIRST image perfectly intact.\n3. Ensure the lighting and fabric textures match the environment." },
+              { text: "TASK: High-Fidelity Virtual Try-On.\nYou are an expert AI fashion retoucher.\nImage 1: A person.\nImage 2: A target garment.\n\nCRITICAL CONSTRAINTS:\n1. COMPLETELY REPLACE the user's current clothing with the target garment from Image 2.\n2. DO NOT just recolor the existing clothing. You MUST alter the garment shape, collar, sleeves, and details. If the original clothing has a hood, pocket, or zipper, and the target garment does not, REMOVE THEM entirely.\n3. The fabric texture (e.g. cashmere, knit, cotton), drape, and color must exactly match Image 2.\n4. Keep the exact background, face, hair, skin, and pose of the person in Image 1 perfectly intact.\n5. Ensure realistic lighting, shadows, and blending." },
               { inlineData: { data: baseResult.data, mimeType: baseResult.mimeType } },
               { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
             ]
