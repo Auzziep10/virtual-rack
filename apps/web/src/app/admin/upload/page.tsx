@@ -165,60 +165,60 @@ export default function AdminUploadPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 p-8 flex flex-col items-center font-sans text-neutral-50 gap-8 py-16">
+    <div className="min-h-screen bg-neutral-50 p-8 flex flex-col items-center font-sans text-neutral-900 gap-8 py-16">
       <div className="w-full max-w-lg flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-white">Portal Dashboard</h1>
-        <Link href="/admin/garments" className="text-sm text-neutral-400 hover:text-white hover:underline underline-offset-4 transition-all">
+        <h1 className="text-2xl font-bold tracking-tight text-neutral-900">Portal Dashboard</h1>
+        <Link href="/admin/garments" className="text-sm text-neutral-500 hover:text-neutral-900 hover:underline underline-offset-4 transition-all">
           View All Garments →
         </Link>
       </div>
       
-      <Card className="w-full max-w-lg bg-neutral-900 border-neutral-800 shadow-2xl text-white">
+      <Card className="w-full max-w-lg bg-white border-neutral-200 shadow-xl text-neutral-900">
         <CardHeader>
           <CardTitle className="text-xl tracking-wide">Garment Upload Portal</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription className="text-neutral-500">
             Upload mock garments and their metadata to the database.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label htmlFor="name" className="text-neutral-300">Garment Name</Label>
+            <Label htmlFor="name" className="text-neutral-700 font-medium">Garment Name</Label>
             <Input 
               id="name" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Beige Sweater"
-              className="bg-neutral-950 border-neutral-800 text-neutral-300"
+              className="bg-white border-neutral-300 text-neutral-900 focus-visible:ring-neutral-400"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="type" className="text-neutral-300">Type</Label>
+              <Label htmlFor="type" className="text-neutral-700 font-medium">Type</Label>
               <select 
                 id="type"
                 value={type}
                 onChange={(e) => setType(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
               >
                 {TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
               </select>
             </div>
             
             <div className="flex flex-col gap-3">
-              <Label htmlFor="color" className="text-neutral-300">Brand Color Hex</Label>
+              <Label htmlFor="color" className="text-neutral-700 font-medium">Brand Color Hex</Label>
               <div className="flex items-center gap-2">
                 <input 
                   type="color" 
                   value={colorHex}
                   onChange={(e) => setColorHex(e.target.value)}
-                  className="h-10 w-10 bg-transparent rounded cursor-pointer"
+                  className="h-10 w-10 bg-transparent rounded cursor-pointer border border-neutral-200"
                 />
                 <Input 
                   id="color" 
                   value={colorHex}
                   onChange={(e) => setColorHex(e.target.value)}
-                  className="bg-neutral-950 border-neutral-800 text-neutral-300 flex-1"
+                  className="bg-white border-neutral-300 text-neutral-900 flex-1 focus-visible:ring-neutral-400"
                 />
               </div>
             </div>
@@ -226,12 +226,12 @@ export default function AdminUploadPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-3">
-              <Label htmlFor="gender" className="text-neutral-300">Gender</Label>
+              <Label htmlFor="gender" className="text-neutral-700 font-medium">Gender</Label>
               <select 
                 id="gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
               >
                 <option value="Men">Men</option>
                 <option value="Women">Women</option>
@@ -240,12 +240,12 @@ export default function AdminUploadPage() {
             </div>
 
             <div className="flex flex-col gap-3">
-              <Label htmlFor="occasion" className="text-neutral-300">Occasion Category</Label>
+              <Label htmlFor="occasion" className="text-neutral-700 font-medium">Occasion Category</Label>
               <select 
                 id="occasion"
                 value={occasion}
                 onChange={(e) => setOccasion(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
               >
                 {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
@@ -253,28 +253,28 @@ export default function AdminUploadPage() {
           </div>
 
           <div className="flex flex-col gap-3">
-            <Label htmlFor="asset" className="text-neutral-300">2D Image (PNG/JPG)</Label>
+            <Label htmlFor="asset" className="text-neutral-700 font-medium">2D Image (PNG/JPG)</Label>
             <Input 
               id="asset" 
               type="file" 
               accept="image/*" 
               onChange={handleFileChange}
-              className="bg-neutral-950 border-neutral-800 text-neutral-300 file:text-white file:bg-neutral-800 file:border-0 file:mr-4 file:py-2 file:px-4 file:rounded-md cursor-pointer"
+              className="bg-white border-neutral-300 text-neutral-900 file:text-neutral-900 file:bg-neutral-100 file:border-0 file:mr-4 file:py-2 file:px-4 file:rounded-md cursor-pointer hover:file:bg-neutral-200"
             />
           </div>
 
           {progress > 0 && progress < 100 && (
-            <div className="w-full bg-neutral-800 rounded-full h-2">
+            <div className="w-full bg-neutral-200 rounded-full h-2">
               <div 
-                className="bg-white h-2 rounded-full transition-all duration-300" 
+                className="bg-neutral-900 h-2 rounded-full transition-all duration-300" 
                 style={{ width: `${progress}%` }} 
               />
             </div>
           )}
 
           {successMessage && (
-            <div className="p-4 bg-green-950 border border-green-800 rounded-md">
-              <p className="text-green-400 text-sm font-medium">{successMessage}</p>
+            <div className="p-4 bg-green-50 border border-green-200 rounded-md">
+              <p className="text-green-700 text-sm font-medium">{successMessage}</p>
             </div>
           )}
         </CardContent>
@@ -282,28 +282,28 @@ export default function AdminUploadPage() {
           <Button 
             onClick={handleUpload} 
             disabled={!file || !name || isUploading}
-            className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50"
+            className="w-full bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50"
           >
             {isUploading ? 'Uploading...' : 'Save Garment'}
           </Button>
         </CardFooter>
       </Card>
 
-      <Card className="w-full max-w-lg bg-neutral-900 border-neutral-800 shadow-2xl text-white">
+      <Card className="w-full max-w-lg bg-white border-neutral-200 shadow-xl text-neutral-900">
         <CardHeader>
           <CardTitle className="text-xl tracking-wide">Import WOVN Deck</CardTitle>
-          <CardDescription className="text-neutral-400">
+          <CardDescription className="text-neutral-500">
             Select a customer and deck from the WOVN Garment Catalog to import all mockups automatically.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label htmlFor="customer" className="text-neutral-300">Select Customer</Label>
+            <Label htmlFor="customer" className="text-neutral-700 font-medium">Select Customer</Label>
             <select 
               id="customer"
               value={selectedCustomer}
               onChange={(e) => setSelectedCustomer(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+              className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
             >
               <option value="">-- Choose Customer --</option>
               {customers.map(c => <option key={c.id} value={c.id}>{c.company || c.name}</option>)}
@@ -312,12 +312,12 @@ export default function AdminUploadPage() {
 
           {selectedCustomer && (
             <div className="flex flex-col gap-3">
-              <Label htmlFor="deck" className="text-neutral-300">Select Deck</Label>
+              <Label htmlFor="deck" className="text-neutral-700 font-medium">Select Deck</Label>
               <select 
                 id="deck"
                 value={selectedDeck}
                 onChange={(e) => setSelectedDeck(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
               >
                 <option value="">-- Choose Deck --</option>
                 {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
@@ -326,7 +326,7 @@ export default function AdminUploadPage() {
           )}
 
           {importMessage && (
-            <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-950 border-red-800 text-red-400' : 'bg-green-950 border-green-800 text-green-400'}`}>
+            <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
               <p className="text-sm font-medium">{importMessage}</p>
             </div>
           )}
@@ -335,7 +335,7 @@ export default function AdminUploadPage() {
           <Button 
             onClick={handleImport} 
             disabled={!selectedDeck || isImporting}
-            className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50"
+            className="w-full bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50"
           >
             {isImporting ? 'Importing Garments...' : 'Import Deck Garments'}
           </Button>

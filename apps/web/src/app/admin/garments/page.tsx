@@ -72,39 +72,39 @@ export default function AdminGarmentsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 p-8 text-neutral-50 font-sans">
+    <div className="min-h-screen bg-neutral-50 p-8 text-neutral-900 font-sans">
       <div className="max-w-7xl mx-auto flex flex-col gap-8">
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Garment Inventory</h1>
-            <p className="text-neutral-400">Manage all uploaded and imported garments here.</p>
+            <h1 className="text-3xl font-bold tracking-tight text-neutral-900 mb-2">Garment Inventory</h1>
+            <p className="text-neutral-500">Manage all uploaded and imported garments here.</p>
           </div>
-          <Button onClick={fetchGarments} variant="outline" className="bg-neutral-900 text-white border-neutral-700 hover:bg-neutral-800">Refresh List</Button>
+          <Button onClick={fetchGarments} variant="outline" className="bg-white text-neutral-900 border-neutral-300 hover:bg-neutral-100">Refresh List</Button>
         </div>
 
         {loading ? (
-          <div className="text-neutral-400">Loading garments...</div>
+          <div className="text-neutral-500">Loading garments...</div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
             {garments.map(g => (
-              <Card key={g.id} className="bg-neutral-900 border-neutral-800 flex flex-col overflow-hidden group">
-                <div className="aspect-square w-full bg-neutral-950 relative overflow-hidden">
+              <Card key={g.id} className="bg-white border-neutral-200 flex flex-col overflow-hidden group shadow-sm hover:shadow-md transition-shadow">
+                <div className="aspect-square w-full bg-neutral-100 relative overflow-hidden">
                   {g.image ? (
                     <img src={g.image} alt={g.name} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-neutral-600">No Image</div>
+                    <div className="w-full h-full flex items-center justify-center text-neutral-400">No Image</div>
                   )}
                   <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button 
                       onClick={() => setEditGarment({...g})}
-                      className="p-1.5 bg-black/60 rounded text-white hover:bg-black/90 backdrop-blur-sm transition-colors"
+                      className="p-1.5 bg-white/80 rounded text-neutral-700 hover:bg-white hover:text-neutral-900 backdrop-blur-sm transition-colors border border-neutral-200/50 shadow-sm"
                       title="Edit"
                     >
                       <PencilIcon size={14} />
                     </button>
                     <button 
                       onClick={() => handleDelete(g.id)}
-                      className="p-1.5 bg-red-950/80 rounded text-red-400 hover:bg-red-900 hover:text-white backdrop-blur-sm transition-colors"
+                      className="p-1.5 bg-white/80 rounded text-red-600 hover:bg-red-50 hover:text-red-700 backdrop-blur-sm transition-colors border border-red-100/50 shadow-sm"
                       title="Delete"
                     >
                       <TrashIcon size={14} />
@@ -112,11 +112,11 @@ export default function AdminGarmentsPage() {
                   </div>
                 </div>
                 <CardContent className="p-4 flex flex-col gap-2 flex-1">
-                  <h3 className="font-semibold text-white truncate" title={g.name}>{g.name}</h3>
+                  <h3 className="font-semibold text-neutral-900 truncate" title={g.name}>{g.name}</h3>
                   <div className="flex flex-wrap gap-1.5">
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-800 text-neutral-300 uppercase tracking-wider">{g.type}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-950/50 text-blue-300 uppercase tracking-wider border border-blue-900/50">{g.gender}</span>
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/50 text-emerald-300 uppercase tracking-wider border border-emerald-900/50">{g.occasion}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 uppercase tracking-wider border border-neutral-200">{g.type}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 uppercase tracking-wider border border-blue-200">{g.gender}</span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 uppercase tracking-wider border border-emerald-200">{g.occasion}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -128,59 +128,59 @@ export default function AdminGarmentsPage() {
 
       <Dialog open={!!editGarment} onOpenChange={(open) => !open && setEditGarment(null)}>
         {editGarment && (
-          <DialogContent className="bg-neutral-900 border-neutral-800 text-neutral-50 sm:max-w-md">
+          <DialogContent className="bg-white border-neutral-200 text-neutral-900 sm:max-w-md shadow-lg">
             <DialogHeader>
               <DialogTitle className="text-xl">Edit Garment</DialogTitle>
             </DialogHeader>
             <div className="flex flex-col gap-4 py-4">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-name" className="text-neutral-300">Name</Label>
+                <Label htmlFor="edit-name" className="text-neutral-700 font-medium">Name</Label>
                 <Input 
                   id="edit-name" 
                   value={editGarment.name}
                   onChange={(e) => setEditGarment({...editGarment, name: e.target.value})}
-                  className="bg-neutral-950 border-neutral-800 text-white"
+                  className="bg-white border-neutral-300 text-neutral-900 focus-visible:ring-neutral-400"
                 />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-type" className="text-neutral-300">Type</Label>
+                  <Label htmlFor="edit-type" className="text-neutral-700 font-medium">Type</Label>
                   <select 
                     id="edit-type"
                     value={editGarment.type}
                     onChange={(e) => setEditGarment({...editGarment, type: e.target.value})}
-                    className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                    className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
                   >
                     {TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
                   </select>
                 </div>
                 <div className="flex flex-col gap-2">
-                  <Label htmlFor="edit-gender" className="text-neutral-300">Gender</Label>
+                  <Label htmlFor="edit-gender" className="text-neutral-700 font-medium">Gender</Label>
                   <select 
                     id="edit-gender"
                     value={editGarment.gender}
                     onChange={(e) => setEditGarment({...editGarment, gender: e.target.value})}
-                    className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                    className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
                   >
                     {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
                   </select>
                 </div>
               </div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="edit-occasion" className="text-neutral-300">Occasion Category</Label>
+                <Label htmlFor="edit-occasion" className="text-neutral-700 font-medium">Occasion Category</Label>
                 <select 
                   id="edit-occasion"
                   value={editGarment.occasion}
                   onChange={(e) => setEditGarment({...editGarment, occasion: e.target.value})}
-                  className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+                  className="flex h-10 w-full rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
                 >
                   {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               </div>
             </div>
             <DialogFooter>
-              <Button variant="ghost" className="text-neutral-300 hover:text-white hover:bg-neutral-800" onClick={() => setEditGarment(null)}>Cancel</Button>
-              <Button onClick={handleSaveEdit} disabled={isSaving} className="bg-white text-black hover:bg-neutral-200">{isSaving ? 'Saving...' : 'Save Changes'}</Button>
+              <Button variant="ghost" className="text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100" onClick={() => setEditGarment(null)}>Cancel</Button>
+              <Button onClick={handleSaveEdit} disabled={isSaving} className="bg-neutral-900 text-white hover:bg-neutral-800">{isSaving ? 'Saving...' : 'Save Changes'}</Button>
             </DialogFooter>
           </DialogContent>
         )}
