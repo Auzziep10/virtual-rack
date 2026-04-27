@@ -22,6 +22,10 @@ export default function AdminUploadPage() {
   const [progress, setProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+  
+  const [deckUrl, setDeckUrl] = useState('')
+  const [isImporting, setIsImporting] = useState(false)
+  const [importMessage, setImportMessage] = useState<string | null>(null)
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -74,8 +78,62 @@ export default function AdminUploadPage() {
     )
   }
 
+  const handleImport = async () => {
+    if (!deckUrl) return;
+    setIsImporting(true);
+    setImportMessage(null);
+    try {
+      let id = deckUrl.trim();
+      const match = id.match(/\/presentation\/([a-zA-Z0-9_-]+)/);
+      if (match && match[1]) {
+        id = match[1];
+      } else {
+        const deckMatch = id.match(/\/deck\/([a-zA-Z0-9_-]+)/);
+        if (deckMatch && deckMatch[1]) id = deckMatch[1];
+      }
+
+      const res = await fetch(`https://wovn-garment-catalog.vercel.app/api/decks/${id}`);
+      if (!res.ok) throw new Error('Failed to fetch deck details');
+      const data = await res.json();
+      
+      if (!data.items || data.items.length === 0) {
+        throw new Error('Deck is empty or not found');
+      }
+
+      let count = 0;
+      for (const item of data.items) {
+        let garmentType = 'top';
+        const itemType = (item.type || '').toLowerCase();
+        if (itemType.includes('bottom') || itemType.includes('pants')) garmentType = 'bottom';
+        else if (itemType.includes('dress')) garmentType = 'dress';
+
+        let garmentOccasion = 'Casual';
+        const itemCat = (item.category || '').toLowerCase();
+        if (itemCat.includes('executive') || itemCat.includes('corporate')) garmentOccasion = 'Corporate';
+        else if (itemCat.includes('athleisure') || itemCat.includes('active')) garmentOccasion = 'Gym';
+
+        await addDoc(collection(db, 'garments'), {
+          name: item.garment_name || 'Imported Garment',
+          type: garmentType,
+          occasion: garmentOccasion,
+          color: '#ffffff',
+          image: item.mock_image || item.original_image || '',
+          createdAt: new Date().toISOString()
+        });
+        count++;
+      }
+      setImportMessage(`Successfully imported ${count} garments!`);
+      setDeckUrl('');
+    } catch (error: any) {
+      console.error(error);
+      setImportMessage(`Error: ${error.message}`);
+    } finally {
+      setIsImporting(false);
+    }
+  }
+
   return (
-    <div className="min-h-screen bg-neutral-950 p-8 flex items-center justify-center font-sans text-neutral-50">
+    <div className="min-h-screen bg-neutral-950 p-8 flex flex-col items-center justify-center font-sans text-neutral-50 gap-8 py-16">
       <Card className="w-full max-w-lg bg-neutral-900 border-neutral-800 shadow-2xl text-white">
         <CardHeader>
           <CardTitle className="text-xl tracking-wide">Garment Upload Portal</CardTitle>
@@ -172,6 +230,42 @@ export default function AdminUploadPage() {
             className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50"
           >
             {isUploading ? 'Uploading...' : 'Save Garment'}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <Card className="w-full max-w-lg bg-neutral-900 border-neutral-800 shadow-2xl text-white">
+        <CardHeader>
+          <CardTitle className="text-xl tracking-wide">Import WOVN Deck</CardTitle>
+          <CardDescription className="text-neutral-400">
+            Paste a presentation URL from the WOVN Garment Catalog to import all mockups automatically.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-6">
+          <div className="flex flex-col gap-3">
+            <Label htmlFor="deckUrl" className="text-neutral-300">Presentation URL or Deck ID</Label>
+            <Input 
+              id="deckUrl" 
+              value={deckUrl}
+              onChange={(e) => setDeckUrl(e.target.value)}
+              placeholder="e.g. https://wovn-garment-catalog.vercel.app/presentation/abc123XYZ"
+              className="bg-neutral-950 border-neutral-800 text-neutral-300"
+            />
+          </div>
+
+          {importMessage && (
+            <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-950 border-red-800 text-red-400' : 'bg-green-950 border-green-800 text-green-400'}`}>
+              <p className="text-sm font-medium">{importMessage}</p>
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button 
+            onClick={handleImport} 
+            disabled={!deckUrl || isImporting}
+            className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50"
+          >
+            {isImporting ? 'Importing Garments...' : 'Import Deck Garments'}
           </Button>
         </CardFooter>
       </Card>
