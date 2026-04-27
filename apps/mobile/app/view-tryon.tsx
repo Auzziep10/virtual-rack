@@ -6,7 +6,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 
 export default function ViewTryOnScreen() {
   const params = useLocalSearchParams();
-  const uri = params.uri as string;
+  const uri = params.uri ? decodeURIComponent(params.uri as string) : null;
   const garmentName = params.garmentName as string || 'Try-On Result';
   const insets = useSafeAreaInsets();
 

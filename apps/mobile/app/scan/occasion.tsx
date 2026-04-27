@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,10 +8,9 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 const OCCASIONS = [
   'Casual',
   'Corporate',
-  'Wedding',
+  'Athleisure',
   'Night Out',
-  'Gym',
-  'Mixer',
+  'Formal',
   'Lounge',
 ];
 
@@ -21,6 +20,7 @@ const ITEM_HEIGHT = 80;
 export default function OccasionScreen() {
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [gender, setGender] = useState<'Men' | 'Women'>('Men');
 
   // Calculate padding so first and last items can be centered
   const halfScreen = SCREEN_HEIGHT / 2;
@@ -42,11 +42,27 @@ export default function OccasionScreen() {
         <IconSymbol name="chevron.left" size={24} color="#000" />
       </TouchableOpacity>
 
+      {/* Gender Toggle */}
+      <View style={[styles.genderToggle, { top: insets.top + 70 }]}>
+        <TouchableOpacity 
+          style={[styles.genderOption, gender === 'Men' && styles.genderOptionActive]}
+          onPress={() => setGender('Men')}
+        >
+          <Text style={[styles.genderText, gender === 'Men' && styles.genderTextActive]}>Men</Text>
+        </TouchableOpacity>
+        <TouchableOpacity 
+          style={[styles.genderOption, gender === 'Women' && styles.genderOptionActive]}
+          onPress={() => setGender('Women')}
+        >
+          <Text style={[styles.genderText, gender === 'Women' && styles.genderTextActive]}>Women</Text>
+        </TouchableOpacity>
+      </View>
+
       <Animated.Text 
         style={[
           styles.promptTitle, 
           { 
-            top: insets.top + 120,
+            top: insets.top + 130,
             opacity: scrollY.interpolate({
               inputRange: [0, ITEM_HEIGHT / 2],
               outputRange: [1, 0],
@@ -113,7 +129,7 @@ export default function OccasionScreen() {
             >
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item } })}
+                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item, gender } })}
               >
                 <Text style={styles.itemText}>{item}</Text>
               </TouchableOpacity>
