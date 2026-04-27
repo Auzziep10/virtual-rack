@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import * as ImagePicker from 'expo-image-picker';
 
 const { width } = Dimensions.get('window');
 
@@ -54,20 +55,40 @@ export default function DashboardScreen() {
           </View>
         </View>
 
-        <TouchableOpacity 
-          style={styles.scanButtonContainer}
-          activeOpacity={0.8}
-          onPress={() => router.push('/scan')}
-        >
-          <View style={styles.scanButtonInner}>
-            <IconSymbol name="viewfinder" size={32} color="#fff" style={styles.scanIcon} />
-            <View style={{ flex: 1 }}>
-              <Text style={styles.scanButtonTitle}>New Body Scan</Text>
-              <Text style={styles.scanButtonSubtitle}>Digitize your exact measurements</Text>
-            </View>
-            <IconSymbol name="chevron.right" size={20} color="#fff" style={styles.chevron} />
-          </View>
-        </TouchableOpacity>
+        <View style={styles.actionRow}>
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: '#8a2be2' }]}
+            activeOpacity={0.8}
+            onPress={async () => {
+              const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+              if (permissionResult.granted === false) {
+                alert("You've refused to allow this app to access your camera!");
+                return;
+              }
+              const result = await ImagePicker.launchCameraAsync({
+                mediaTypes: ['images'],
+                quality: 1,
+              });
+              if (!result.canceled) {
+                router.push({ pathname: '/scan/occasion', params: { imageUri: result.assets[0].uri } });
+              }
+            }}
+          >
+            <IconSymbol name="tshirt.fill" size={28} color="#fff" style={{ marginBottom: 12 }} />
+            <Text style={styles.actionButtonTitle}>Virtual Try-On</Text>
+            <Text style={styles.actionButtonSubtitle}>2D Photo</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[styles.actionButton, { backgroundColor: '#000' }]}
+            activeOpacity={0.8}
+            onPress={() => router.push('/scan')}
+          >
+            <IconSymbol name="viewfinder" size={28} color="#fff" style={{ marginBottom: 12 }} />
+            <Text style={styles.actionButtonTitle}>3D Body Scan</Text>
+            <Text style={styles.actionButtonSubtitle}>Get sizing .obj</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>My Scans</Text>
@@ -158,38 +179,32 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 2,
   },
-  scanButtonContainer: {
-    borderRadius: 24,
-    overflow: 'hidden',
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: 40,
-    backgroundColor: '#000',
+    gap: 16,
+  },
+  actionButton: {
+    flex: 1,
+    borderRadius: 24,
+    padding: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.2,
-    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
     elevation: 8,
   },
-  scanButtonInner: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 24,
-  },
-  scanIcon: {
-    marginRight: 16,
-  },
-  scanButtonTitle: {
-    fontSize: 20,
-    fontWeight: '600',
+  actionButtonTitle: {
+    fontSize: 18,
+    fontWeight: '700',
     color: '#fff',
     marginBottom: 4,
     letterSpacing: -0.5,
   },
-  scanButtonSubtitle: {
-    fontSize: 14,
+  actionButtonSubtitle: {
+    fontSize: 13,
     color: 'rgba(255,255,255,0.7)',
-  },
-  chevron: {
-    marginLeft: 10,
   },
   sectionHeader: {
     flexDirection: 'row',

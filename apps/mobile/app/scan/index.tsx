@@ -3,8 +3,9 @@ import { StyleSheet, View, Text, TouchableOpacity, Animated, Easing } from 'reac
 import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-
-import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { storage } from '@/lib/firebase';
+import { Alert } from 'react-native';
 
 export default function ScanningScreen() {
   const scanAnim = useRef(new Animated.Value(0)).current;
@@ -53,26 +54,35 @@ export default function ScanningScreen() {
     if (scannerRef.current) {
       scannerRef.current.startCapturing();
     }
-    // We remove the setTimeout so the user can finish scanning.
-    // The onModelReady callback handles the routing when the scan is done.
   };
 
-  const handleTakePhoto = async () => {
-    const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
+  const handleModelReady = async (event: any) => {
+    const objUri = event.nativeEvent.uri;
+    console.log("Model ready at", objUri);
     
-    if (permissionResult.granted === false) {
-      alert("You've refused to allow this app to access your camera!");
-      return;
-    }
-
-    const result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      // Route to next screen with the image URI
-      router.push({ pathname: '/scan/occasion', params: { imageUri: result.assets[0].uri } });
+    try {
+      Alert.alert("Uploading", "Saving your 3D body scan...");
+      
+      // Fetch the local .obj file as a Blob
+      const response = await fetch(objUri);
+      const blob = await response.blob();
+      
+      const fileName = `scans/body_${Date.now()}_${Math.random().toString(36).substring(7)}.obj`;
+      const storageRef = ref(storage, fileName);
+      
+      // Upload to Firebase Storage
+      await uploadBytes(storageRef, blob);
+      const downloadUrl = await getDownloadURL(storageRef);
+      
+      Alert.alert("Success", "3D Scan saved successfully!");
+      console.log("Uploaded obj URL:", downloadUrl);
+      
+      // Return to dashboard after saving
+      router.navigate('/(tabs)');
+    } catch (error) {
+      console.error("Failed to upload .obj:", error);
+      Alert.alert("Error", "Could not save the 3D scan.");
+      router.navigate('/(tabs)');
     }
   };
 
@@ -81,10 +91,7 @@ export default function ScanningScreen() {
       <EnvironmentScannerView 
         ref={scannerRef} 
         style={styles.scanner} 
-        onModelReady={(event) => {
-          console.log("Model ready at", event.nativeEvent.uri);
-          router.push('/scan/occasion');
-        }}
+        onModelReady={handleModelReady}
       />
       
       {/* Animated Scan Line */}
@@ -108,13 +115,7 @@ export default function ScanningScreen() {
 
       {/* Controls Container */}
       <View style={styles.controlsContainer}>
-        <TouchableOpacity 
-          style={styles.secondaryButton}
-          onPress={handleTakePhoto}
-        >
-          <IconSymbol name="camera" size={24} color="#fff" />
-          <Text style={styles.buttonText}>2D Photo</Text>
-        </TouchableOpacity>
+        <View style={{ width: 80 }} />
 
         <TouchableOpacity 
           style={styles.captureButton}
