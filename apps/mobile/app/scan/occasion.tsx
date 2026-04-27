@@ -1,11 +1,13 @@
-import React, { useRef, useState } from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Image } from 'react-native';
+import React, { useRef, useState, useEffect } from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Image, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 import { IconSymbol } from '@/components/ui/icon-symbol';
 
-const OCCASIONS = [
+const FALLBACK_OCCASIONS = [
   'Casual',
   'Corporate',
   'Athleisure',
@@ -22,6 +24,25 @@ export default function OccasionScreen() {
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
   const [gender, setGender] = useState<'Men' | 'Women'>('Men');
+  const [occasions, setOccasions] = useState<string[]>(FALLBACK_OCCASIONS);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchOccasions() {
+      try {
+        const snapshot = await getDocs(collection(db, 'occasions'));
+        if (!snapshot.empty) {
+          const fetchedOccasions = snapshot.docs.map(doc => doc.data().name || doc.id);
+          setOccasions(fetchedOccasions);
+        }
+      } catch (error) {
+        console.error("Error fetching occasions:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchOccasions();
+  }, []);
 
   // Calculate padding so first and last items can be centered
   const halfScreen = SCREEN_HEIGHT / 2;
@@ -79,7 +100,7 @@ export default function OccasionScreen() {
       </Animated.Text>
 
       <Animated.FlatList
-        data={OCCASIONS}
+        data={occasions}
         keyExtractor={(item) => item}
         showsVerticalScrollIndicator={false}
         snapToInterval={ITEM_HEIGHT}
