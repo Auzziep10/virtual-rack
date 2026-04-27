@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIn
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { collection, query, where, getDocs, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { db, storage, app } from '@/lib/firebase';
 
@@ -251,9 +251,24 @@ export default function TryOnScreen() {
       {/* Save Button */}
       <TouchableOpacity 
         style={styles.saveButton}
-        onPress={() => {
-          Alert.alert("Saved!", "Outfit saved to your virtual closet.");
-          router.navigate('/(tabs)');
+        onPress={async () => {
+          if (!resultImage) {
+            Alert.alert("Wait!", "Please select a garment and wait for the try-on to generate first.");
+            return;
+          }
+          try {
+            await addDoc(collection(db, 'tryOns'), {
+              imageUrl: resultImage,
+              garmentId: selectedGarment?.id || '',
+              garmentName: selectedGarment?.name || '',
+              createdAt: new Date().toISOString()
+            });
+            Alert.alert("Saved!", "Outfit saved to your virtual closet.");
+            router.navigate('/(tabs)');
+          } catch (error) {
+            console.error("Error saving try-on:", error);
+            Alert.alert("Error", "Could not save outfit to closet.");
+          }
         }}
       >
         <Text style={styles.saveButtonText}>Save to Closet</Text>

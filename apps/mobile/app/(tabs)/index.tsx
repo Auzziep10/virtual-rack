@@ -1,14 +1,38 @@
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
+  const [tryOns, setTryOns] = useState<any[]>([]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      async function fetchTryOns() {
+        try {
+          const q = query(collection(db, 'tryOns'), orderBy('createdAt', 'desc'), limit(10));
+          const querySnapshot = await getDocs(q);
+          const fetched = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }));
+          setTryOns(fetched);
+        } catch (error) {
+          console.error("Error fetching try-ons:", error);
+        }
+      }
+      
+      fetchTryOns();
+    }, [])
+  );
 
   return (
     <View style={styles.container}>
@@ -68,14 +92,25 @@ export default function DashboardScreen() {
         </View>
 
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalScroll}>
-          {[1, 2, 3].map((item) => (
-            <View key={`tryon-${item}`} style={styles.horizontalCard}>
+          {tryOns.length > 0 ? (
+            tryOns.map((item) => (
+              <View key={item.id} style={styles.horizontalCard}>
+                <Image 
+                  source={{ uri: item.imageUrl }} 
+                  style={styles.horizontalCardImage} 
+                  resizeMode="cover" 
+                />
+                <Text style={styles.cardTitle}>{item.garmentName || 'New Look'}</Text>
+              </View>
+            ))
+          ) : (
+            <View style={styles.horizontalCard}>
               <View style={styles.horizontalCardPlaceholder}>
                 <IconSymbol name="tshirt" size={32} color="#ddd" />
               </View>
-              <Text style={styles.cardTitle}>Look {item}</Text>
+              <Text style={styles.cardTitle}>No Try-Ons yet</Text>
             </View>
-          ))}
+          )}
         </ScrollView>
       </ScrollView>
     </View>
@@ -220,6 +255,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
+  },
+  horizontalCardImage: {
+    height: 160,
+    width: '100%',
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: '#f5f5f5',
   },
   cardTitle: {
     fontSize: 16,
