@@ -75,19 +75,19 @@ export default function OccasionScreen() {
 
           const scale = scrollY.interpolate({
             inputRange,
-            outputRange: [0.7, 0.8, 1.15, 0.8, 0.7],
+            outputRange: [0.6, 0.8, 1.15, 0.8, 0.6],
             extrapolate: 'clamp',
           });
 
           const opacity = scrollY.interpolate({
             inputRange,
-            outputRange: [0.2, 0.5, 1, 0.5, 0.2],
+            outputRange: [0, 0.25, 1, 0.25, 0],
             extrapolate: 'clamp',
           });
 
           const translateY = scrollY.interpolate({
             inputRange,
-            outputRange: [20, 10, 0, -10, -20],
+            outputRange: [30, 15, 0, -15, -30],
             extrapolate: 'clamp',
           });
 
