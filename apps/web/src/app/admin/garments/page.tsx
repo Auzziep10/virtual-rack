@@ -20,6 +20,9 @@ export default function AdminGarmentsPage() {
 
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
+  const [filterGender, setFilterGender] = useState('All')
+  const [filterOccasion, setFilterOccasion] = useState('All')
+  const [filterType, setFilterType] = useState('All')
 
   const [editGarment, setEditGarment] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
@@ -99,11 +102,17 @@ export default function AdminGarmentsPage() {
     }
   }
 
-  const filteredAndSortedGarments = garments.filter(g => 
-    (g.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
-    (g.type || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (g.occasion || '').toLowerCase().includes(searchQuery.toLowerCase())
-  ).sort((a, b) => {
+  const filteredAndSortedGarments = garments.filter(g => {
+    const matchesSearch = (g.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || 
+                          (g.type || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                          (g.occasion || '').toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesGender = filterGender === 'All' || g.gender === filterGender;
+    const matchesOccasion = filterOccasion === 'All' || g.occasion === filterOccasion;
+    const matchesType = filterType === 'All' || (g.type || '').toLowerCase() === filterType.toLowerCase();
+    
+    return matchesSearch && matchesGender && matchesOccasion && matchesType;
+  }).sort((a, b) => {
     if (sortBy === 'newest') {
       return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     } else if (sortBy === 'oldest') {
@@ -132,23 +141,54 @@ export default function AdminGarmentsPage() {
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Input 
-            placeholder="Search garments by name, type, or occasion..." 
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="flex-1 bg-white border-neutral-300 text-neutral-900 focus-visible:ring-neutral-400"
-          />
-          <select 
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 min-w-[150px]"
-          >
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-            <option value="nameAsc">Name A-Z</option>
-            <option value="nameDesc">Name Z-A</option>
-          </select>
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <Input 
+              placeholder="Search garments by name, type, or occasion..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="flex-1 bg-white border-neutral-300 text-neutral-900 focus-visible:ring-neutral-400"
+            />
+            <select 
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400 min-w-[150px]"
+            >
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="nameAsc">Name A-Z</option>
+              <option value="nameDesc">Name Z-A</option>
+            </select>
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4">
+            <select 
+              value={filterGender}
+              onChange={e => setFilterGender(e.target.value)}
+              className="flex-1 h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            >
+              <option value="All">All Genders</option>
+              {GENDERS.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+
+            <select 
+              value={filterOccasion}
+              onChange={e => setFilterOccasion(e.target.value)}
+              className="flex-1 h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            >
+              <option value="All">All Occasions</option>
+              {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+
+            <select 
+              value={filterType}
+              onChange={e => setFilterType(e.target.value)}
+              className="flex-1 h-10 rounded-md border border-neutral-300 bg-white px-3 py-2 text-sm text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            >
+              <option value="All">All Types</option>
+              {TYPES.map(t => <option key={t} value={t}>{t.toUpperCase()}</option>)}
+            </select>
+          </div>
         </div>
 
         {loading ? (
