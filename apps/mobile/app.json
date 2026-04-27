@@ -55,6 +55,12 @@
             "deploymentTarget": "17.0"
           }
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera to take a photo."
+        }
       ]
     ],
     "experiments": {

@@ -136,13 +136,11 @@ export default function TryOnScreen() {
                   alert("You've refused to allow this app to access your camera!");
                   return;
                 }
-                const result = await ImagePicker.launchCameraAsync({
-                  mediaTypes: ['images'],
-                  quality: 1,
+                // Route to our custom glassmorphic camera screen
+                router.push({
+                  pathname: '/scan/camera',
+                  params: { occasion, gender }
                 });
-                if (!result.canceled) {
-                  setCurrentImageUri(result.assets[0].uri);
-                }
               }}
             >
               <IconSymbol name="camera" size={40} color="#000" />
