@@ -12,6 +12,7 @@ const OCCASIONS = [
   'Night Out',
   'Formal',
   'Lounge',
+  'Swimwear',
 ];
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
