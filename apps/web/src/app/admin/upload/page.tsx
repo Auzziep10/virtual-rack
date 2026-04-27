@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { collection, addDoc } from 'firebase/firestore'
 import { storage, db } from '@/lib/firebase'
@@ -18,14 +18,45 @@ export default function AdminUploadPage() {
   const [type, setType] = useState('top')
   const [occasion, setOccasion] = useState('Casual')
   const [colorHex, setColorHex] = useState('#ffffff')
+  const [gender, setGender] = useState('Male')
   
   const [progress, setProgress] = useState(0)
   const [isUploading, setIsUploading] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   
-  const [deckUrl, setDeckUrl] = useState('')
+  const [customers, setCustomers] = useState<any[]>([])
+  const [selectedCustomer, setSelectedCustomer] = useState('')
+  const [decks, setDecks] = useState<any[]>([])
+  const [selectedDeck, setSelectedDeck] = useState('')
+  
   const [isImporting, setIsImporting] = useState(false)
   const [importMessage, setImportMessage] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('https://wovn-garment-catalog.vercel.app/api/customers')
+      .then(res => res.json())
+      .then(data => {
+        const sorted = data.sort((a: any, b: any) => {
+          const nameA = a.company || a.name || '';
+          const nameB = b.company || b.name || '';
+          return nameA.localeCompare(nameB);
+        });
+        setCustomers(sorted)
+      })
+      .catch(err => console.error("Failed to fetch customers", err))
+  }, [])
+
+  useEffect(() => {
+    if (!selectedCustomer) {
+      setDecks([]);
+      setSelectedDeck('');
+      return;
+    }
+    fetch(`https://wovn-garment-catalog.vercel.app/api/customers/${selectedCustomer}/decks`)
+      .then(res => res.json())
+      .then(data => setDecks(data))
+      .catch(err => console.error("Failed to fetch decks", err))
+  }, [selectedCustomer])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -60,6 +91,7 @@ export default function AdminUploadPage() {
             name,
             type,
             occasion,
+            gender,
             color: colorHex,
             image: downloadUrl,
             createdAt: new Date().toISOString()
@@ -79,20 +111,11 @@ export default function AdminUploadPage() {
   }
 
   const handleImport = async () => {
-    if (!deckUrl) return;
+    if (!selectedDeck) return;
     setIsImporting(true);
     setImportMessage(null);
     try {
-      let id = deckUrl.trim();
-      const match = id.match(/\/presentation\/([a-zA-Z0-9_-]+)/);
-      if (match && match[1]) {
-        id = match[1];
-      } else {
-        const deckMatch = id.match(/\/deck\/([a-zA-Z0-9_-]+)/);
-        if (deckMatch && deckMatch[1]) id = deckMatch[1];
-      }
-
-      const res = await fetch(`https://wovn-garment-catalog.vercel.app/api/decks/${id}`);
+      const res = await fetch(`https://wovn-garment-catalog.vercel.app/api/decks/${selectedDeck}`);
       if (!res.ok) throw new Error('Failed to fetch deck details');
       const data = await res.json();
       
@@ -112,10 +135,16 @@ export default function AdminUploadPage() {
         if (itemCat.includes('executive') || itemCat.includes('corporate')) garmentOccasion = 'Corporate';
         else if (itemCat.includes('athleisure') || itemCat.includes('active')) garmentOccasion = 'Gym';
 
+        let garmentGender = item.gender || 'Male';
+        if (garmentGender !== 'Male' && garmentGender !== 'Female') {
+          garmentGender = 'Male';
+        }
+
         await addDoc(collection(db, 'garments'), {
           name: item.garment_name || 'Imported Garment',
           type: garmentType,
           occasion: garmentOccasion,
+          gender: garmentGender,
           color: '#ffffff',
           image: item.mock_image || item.original_image || '',
           createdAt: new Date().toISOString()
@@ -123,7 +152,7 @@ export default function AdminUploadPage() {
         count++;
       }
       setImportMessage(`Successfully imported ${count} garments!`);
-      setDeckUrl('');
+      setSelectedDeck('');
     } catch (error: any) {
       console.error(error);
       setImportMessage(`Error: ${error.message}`);
@@ -185,16 +214,31 @@ export default function AdminUploadPage() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-3">
-            <Label htmlFor="occasion" className="text-neutral-300">Occasion Category</Label>
-            <select 
-              id="occasion"
-              value={occasion}
-              onChange={(e) => setOccasion(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
-            >
-              {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="gender" className="text-neutral-300">Gender</Label>
+              <select 
+                id="gender"
+                value={gender}
+                onChange={(e) => setGender(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+              >
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="occasion" className="text-neutral-300">Occasion Category</Label>
+              <select 
+                id="occasion"
+                value={occasion}
+                onChange={(e) => setOccasion(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+              >
+                {OCCASIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-col gap-3">
@@ -238,20 +282,37 @@ export default function AdminUploadPage() {
         <CardHeader>
           <CardTitle className="text-xl tracking-wide">Import WOVN Deck</CardTitle>
           <CardDescription className="text-neutral-400">
-            Paste a presentation URL from the WOVN Garment Catalog to import all mockups automatically.
+            Select a customer and deck from the WOVN Garment Catalog to import all mockups automatically.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6">
           <div className="flex flex-col gap-3">
-            <Label htmlFor="deckUrl" className="text-neutral-300">Presentation URL or Deck ID</Label>
-            <Input 
-              id="deckUrl" 
-              value={deckUrl}
-              onChange={(e) => setDeckUrl(e.target.value)}
-              placeholder="e.g. https://wovn-garment-catalog.vercel.app/presentation/abc123XYZ"
-              className="bg-neutral-950 border-neutral-800 text-neutral-300"
-            />
+            <Label htmlFor="customer" className="text-neutral-300">Select Customer</Label>
+            <select 
+              id="customer"
+              value={selectedCustomer}
+              onChange={(e) => setSelectedCustomer(e.target.value)}
+              className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+            >
+              <option value="">-- Choose Customer --</option>
+              {customers.map(c => <option key={c.id} value={c.id}>{c.company || c.name}</option>)}
+            </select>
           </div>
+
+          {selectedCustomer && (
+            <div className="flex flex-col gap-3">
+              <Label htmlFor="deck" className="text-neutral-300">Select Deck</Label>
+              <select 
+                id="deck"
+                value={selectedDeck}
+                onChange={(e) => setSelectedDeck(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-400"
+              >
+                <option value="">-- Choose Deck --</option>
+                {decks.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
+              </select>
+            </div>
+          )}
 
           {importMessage && (
             <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-950 border-red-800 text-red-400' : 'bg-green-950 border-green-800 text-green-400'}`}>
@@ -262,7 +323,7 @@ export default function AdminUploadPage() {
         <CardFooter>
           <Button 
             onClick={handleImport} 
-            disabled={!deckUrl || isImporting}
+            disabled={!selectedDeck || isImporting}
             className="w-full bg-white text-black hover:bg-neutral-200 disabled:opacity-50"
           >
             {isImporting ? 'Importing Garments...' : 'Import Deck Garments'}
