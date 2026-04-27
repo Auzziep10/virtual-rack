@@ -209,7 +209,6 @@ export default function TryOnScreen() {
         </TouchableOpacity>
       )}
 
-      </View>
     </View>
   );
 }
