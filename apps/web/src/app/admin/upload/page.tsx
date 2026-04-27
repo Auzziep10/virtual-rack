@@ -32,6 +32,9 @@ export default function AdminUploadPage() {
   
   const [isImporting, setIsImporting] = useState(false)
   const [importMessage, setImportMessage] = useState<string | null>(null)
+  
+  const [deckItems, setDeckItems] = useState<any[]>([])
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetch('https://wovn-garment-catalog.vercel.app/api/customers')
@@ -51,6 +54,8 @@ export default function AdminUploadPage() {
     if (!selectedCustomer) {
       setDecks([]);
       setSelectedDeck('');
+      setDeckItems([]);
+      setSelectedItems(new Set());
       return;
     }
     fetch(`https://wovn-garment-catalog.vercel.app/api/customers/${selectedCustomer}/decks`)
@@ -58,6 +63,27 @@ export default function AdminUploadPage() {
       .then(data => setDecks(data))
       .catch(err => console.error("Failed to fetch decks", err))
   }, [selectedCustomer])
+
+  useEffect(() => {
+    if (!selectedDeck) {
+      setDeckItems([]);
+      setSelectedItems(new Set());
+      return;
+    }
+    fetch(`https://wovn-garment-catalog.vercel.app/api/decks/${selectedDeck}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.items && data.items.length > 0) {
+          const itemsWithIds = data.items.map((i: any, idx: number) => ({...i, importId: i.id || String(idx)}));
+          setDeckItems(itemsWithIds);
+          setSelectedItems(new Set(itemsWithIds.map((i: any) => i.importId)));
+        } else {
+          setDeckItems([]);
+          setSelectedItems(new Set());
+        }
+      })
+      .catch(err => console.error("Failed to fetch deck items", err));
+  }, [selectedDeck])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -112,20 +138,17 @@ export default function AdminUploadPage() {
   }
 
   const handleImport = async () => {
-    if (!selectedDeck) return;
+    if (!selectedDeck || selectedItems.size === 0) return;
     setIsImporting(true);
     setImportMessage(null);
     try {
-      const res = await fetch(`https://wovn-garment-catalog.vercel.app/api/decks/${selectedDeck}`);
-      if (!res.ok) throw new Error('Failed to fetch deck details');
-      const data = await res.json();
-      
-      if (!data.items || data.items.length === 0) {
-        throw new Error('Deck is empty or not found');
+      const itemsToImport = deckItems.filter(item => selectedItems.has(item.importId));
+      if (itemsToImport.length === 0) {
+        throw new Error('No items selected');
       }
 
       let count = 0;
-      for (const item of data.items) {
+      for (const item of itemsToImport) {
         let garmentType = 'top';
         const itemType = (item.type || '').toLowerCase();
         if (itemType.includes('bottom') || itemType.includes('pants')) garmentType = 'bottom';
@@ -156,7 +179,7 @@ export default function AdminUploadPage() {
         count++;
       }
       setImportMessage(`Successfully imported ${count} garments!`);
-      setSelectedDeck('');
+      setSelectedItems(new Set());
     } catch (error: any) {
       console.error(error);
       setImportMessage(`Error: ${error.message}`);
@@ -326,6 +349,55 @@ export default function AdminUploadPage() {
             </div>
           )}
 
+          {deckItems.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between items-center">
+                <Label className="text-neutral-700 font-medium">Select Items to Import</Label>
+                <button 
+                  onClick={() => {
+                    if (selectedItems.size === deckItems.length) {
+                      setSelectedItems(new Set());
+                    } else {
+                      setSelectedItems(new Set(deckItems.map(i => i.importId)));
+                    }
+                  }}
+                  className="text-xs font-medium text-blue-600 hover:text-blue-800 transition-colors"
+                >
+                  {selectedItems.size === deckItems.length ? 'Deselect All' : 'Select All'}
+                </button>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-h-80 overflow-y-auto p-3 border border-neutral-200 rounded-md bg-neutral-50/50">
+                {deckItems.map(item => (
+                  <div 
+                    key={item.importId} 
+                    className={`flex flex-col gap-2 p-2 rounded-lg border relative cursor-pointer transition-all ${selectedItems.has(item.importId) ? 'bg-blue-50 border-blue-300 ring-1 ring-blue-300 shadow-sm' : 'bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-sm'}`}
+                    onClick={() => {
+                      const newSet = new Set(selectedItems);
+                      if (newSet.has(item.importId)) newSet.delete(item.importId);
+                      else newSet.add(item.importId);
+                      setSelectedItems(newSet);
+                    }}
+                  >
+                    <input 
+                      type="checkbox" 
+                      checked={selectedItems.has(item.importId)}
+                      readOnly
+                      className="absolute top-3 right-3 z-10 w-4 h-4 cursor-pointer accent-blue-600 rounded"
+                    />
+                    <div className="aspect-square bg-neutral-100 rounded-md overflow-hidden pointer-events-none">
+                      {(item.mock_image || item.original_image) ? (
+                        <img src={item.mock_image || item.original_image} alt="" className="w-full h-full object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400">No Image</div>
+                      )}
+                    </div>
+                    <p className="text-xs font-medium text-neutral-900 truncate px-1" title={item.garment_name}>{item.garment_name || 'Unnamed Garment'}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {importMessage && (
             <div className={`p-4 border rounded-md ${importMessage.startsWith('Error') ? 'bg-red-50 border-red-200 text-red-700' : 'bg-green-50 border-green-200 text-green-700'}`}>
               <p className="text-sm font-medium">{importMessage}</p>
@@ -335,10 +407,10 @@ export default function AdminUploadPage() {
         <CardFooter>
           <Button 
             onClick={handleImport} 
-            disabled={!selectedDeck || isImporting}
+            disabled={!selectedDeck || selectedItems.size === 0 || isImporting}
             className="w-full bg-neutral-900 text-white hover:bg-neutral-800 disabled:opacity-50"
           >
-            {isImporting ? 'Importing Garments...' : 'Import Deck Garments'}
+            {isImporting ? 'Importing Garments...' : `Import ${selectedItems.size > 0 ? selectedItems.size : ''} Selected Garment${selectedItems.size === 1 ? '' : 's'}`}
           </Button>
         </CardFooter>
       </Card>
