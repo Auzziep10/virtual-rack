@@ -20,6 +20,7 @@ interface Garment {
 export default function TryOnScreen() {
   const params = useLocalSearchParams();
   const occasion = params.occasion || 'Casual';
+  const gender = params.gender || 'Men';
   const imageUri = params.imageUri as string | undefined;
   const insets = useSafeAreaInsets();
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -40,7 +41,11 @@ export default function TryOnScreen() {
   useEffect(() => {
     async function fetchGarments() {
       try {
-        const q = query(collection(db, 'garments'), where('occasion', '==', occasion));
+        const q = query(
+          collection(db, 'garments'), 
+          where('occasion', '==', occasion),
+          where('gender', '==', gender)
+        );
         const querySnapshot = await getDocs(q);
         const fetched = querySnapshot.docs.map(doc => ({
           id: doc.id,
