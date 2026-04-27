@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, Animated, Dimensions, Image, ActivityIndicator } from 'react-native';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
@@ -22,6 +22,9 @@ const ITEM_HEIGHT = 80;
 
 export default function OccasionScreen() {
   const insets = useSafeAreaInsets();
+  const params = useLocalSearchParams();
+  const imageUri = params.imageUri as string | undefined;
+  
   const scrollY = useRef(new Animated.Value(0)).current;
   const [gender, setGender] = useState<'Men' | 'Women'>('Men');
   const [occasions, setOccasions] = useState<string[]>(FALLBACK_OCCASIONS);
@@ -154,7 +157,7 @@ export default function OccasionScreen() {
             >
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item, gender } })}
+                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item, gender, ...(imageUri ? { imageUri } : {}) } })}
               >
                 <Text style={styles.itemText}>{item}</Text>
               </TouchableOpacity>

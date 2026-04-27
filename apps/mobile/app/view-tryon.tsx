@@ -30,6 +30,12 @@ export default function ViewTryOnScreen() {
       {/* Bottom Info Area */}
       <View style={[styles.bottomInfo, { paddingBottom: insets.bottom + 20 }]}>
         <Text style={styles.garmentName}>{garmentName}</Text>
+        <TouchableOpacity 
+          style={styles.tryMoreButton}
+          onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: uri } })}
+        >
+          <Text style={styles.tryMoreText}>Try More on this Photo</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -61,14 +67,32 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    paddingTop: 20,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingTop: 24,
     paddingHorizontal: 20,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    alignItems: 'center',
   },
   garmentName: {
     color: '#fff',
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: '600',
     textAlign: 'center',
+    marginBottom: 20,
+  },
+  tryMoreButton: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  tryMoreText: {
+    color: '#000',
+    fontSize: 16,
+    fontWeight: '700',
   }
 });

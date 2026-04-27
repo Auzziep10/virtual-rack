@@ -225,7 +225,7 @@ export default function TryOnScreen() {
               extrapolate: 'clamp',
             });
             
-            const translateY = scrollY.interpolate({
+            const translateX = scrollY.interpolate({
               inputRange: [
                 itemPosition - ITEM_HEIGHT * 2,
                 itemPosition - ITEM_HEIGHT,
@@ -233,13 +233,13 @@ export default function TryOnScreen() {
                 itemPosition + ITEM_HEIGHT,
                 itemPosition + ITEM_HEIGHT * 2
               ],
-              outputRange: [30, 15, 0, -15, -30],
+              outputRange: [30, 15, 0, 15, 30],
               extrapolate: 'clamp',
             });
 
             const isSelected = selectedGarment?.id === garment.id;
             return (
-              <Animated.View style={{ opacity, transform: [{ scale }, { translateY }] }}>
+              <Animated.View style={{ opacity, transform: [{ scale }, { translateX }] }}>
                 <TouchableOpacity
                   style={[
                     styles.bubble,
@@ -350,10 +350,11 @@ const styles = StyleSheet.create({
   },
   bubblesContainer: {
     position: 'absolute',
-    left: 20,
+    left: 5,
     bottom: 120, // Adjusted to make room for save button
-    width: 70,
+    width: 100,
     zIndex: 10,
+    alignItems: 'center', // Center the bubbles within the wider container
   },
   bubble: {
     width: 60,
