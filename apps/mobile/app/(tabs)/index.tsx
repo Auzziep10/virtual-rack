@@ -96,11 +96,11 @@ export default function DashboardScreen() {
           <TouchableOpacity 
             style={[styles.actionButton, { backgroundColor: '#8a2be2' }]}
             activeOpacity={0.8}
-            onPress={() => router.push('/scan/occasion')}
+            onPress={() => router.push('/scan/camera')}
           >
             <IconSymbol name="tshirt.fill" size={28} color="#fff" style={{ marginBottom: 12 }} />
             <Text style={styles.actionButtonTitle}>Virtual Try-On</Text>
-            <Text style={styles.actionButtonSubtitle}>Select Occasion</Text>
+            <Text style={styles.actionButtonSubtitle}>Take a photo</Text>
           </TouchableOpacity>
 
           <TouchableOpacity 

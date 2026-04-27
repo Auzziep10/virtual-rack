@@ -5,6 +5,7 @@ import { BlurView } from 'expo-blur';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function CustomCameraScreen() {
   const [facing, setFacing] = useState<CameraType>('front');
@@ -44,39 +45,54 @@ export default function CustomCameraScreen() {
     });
   }
 
+  const pickFromLibrary = async () => {
+    const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (permissionResult.granted === false) {
+      alert("You've refused to allow this app to access your photos!");
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 1,
+    });
+    if (!result.canceled && result.assets[0]?.uri) {
+      router.replace({ 
+        pathname: '/scan/occasion', 
+        params: { imageUri: result.assets[0].uri } 
+      });
+    }
+  };
+
   const takePicture = async () => {
     if (!cameraRef.current || isCapturing) return;
 
+    setIsCapturing(true);
+
     if (timer > 0) {
-      setCountdown(timer);
-      
       for (let i = timer; i > 0; i--) {
         setCountdown(i);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
-      setCountdown(null);
     }
 
-    setIsCapturing(true);
     try {
       const photo = await cameraRef.current.takePictureAsync({
         quality: 1,
-        // Optional: skipProcessing: true to speed it up if needed
       });
       
+      setCountdown(null); // Clear countdown AFTER taking the picture to prevent re-render crash
+      
       if (photo && photo.uri) {
-        // Go back to try-on with the new photo URI
+        // Go back to occasion screen with the new photo URI
         router.replace({ 
-          pathname: '/scan/try-on', 
-          params: { 
-            ...params, 
-            imageUri: photo.uri 
-          } 
+          pathname: '/scan/occasion', 
+          params: { imageUri: photo.uri } 
         });
       }
     } catch (error) {
       console.error('Failed to take photo', error);
       setIsCapturing(false);
+      setCountdown(null);
     }
   };
 
@@ -121,8 +137,9 @@ export default function CustomCameraScreen() {
           tint="dark" 
           style={[styles.bottomControls, { paddingBottom: insets.bottom + 30 }]}
         >
-          {/* Empty view for flex balance */}
-          <View style={{ width: 60 }} />
+          <TouchableOpacity style={styles.libraryButton} onPress={pickFromLibrary}>
+            <IconSymbol name="photo.on.rectangle" size={24} color="#fff" />
+          </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.captureButtonContainer} 
@@ -135,7 +152,7 @@ export default function CustomCameraScreen() {
           </TouchableOpacity>
           
           {/* Empty view for flex balance */}
-          <View style={{ width: 60 }} />
+          <View style={{ width: 44 }} />
         </BlurView>
         
       </CameraView>
@@ -200,6 +217,14 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  libraryButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.15)',
     justifyContent: 'center',
     alignItems: 'center',

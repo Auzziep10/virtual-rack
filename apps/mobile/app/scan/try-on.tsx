@@ -107,45 +107,7 @@ export default function TryOnScreen() {
           <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} resizeMode="cover" />
         ) : (
           <View style={styles.photoPickerContainer}>
-            <TouchableOpacity 
-              style={styles.photoPickerButton}
-              onPress={async () => {
-                const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-                if (permissionResult.granted === false) {
-                  alert("You've refused to allow this app to access your photos!");
-                  return;
-                }
-                const result = await ImagePicker.launchImageLibraryAsync({
-                  mediaTypes: ['images'],
-                  quality: 1,
-                });
-                if (!result.canceled) {
-                  setCurrentImageUri(result.assets[0].uri);
-                }
-              }}
-            >
-              <IconSymbol name="photo.on.rectangle" size={40} color="#000" />
-              <Text style={styles.photoPickerText}>Choose from Library</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={[styles.photoPickerButton, { marginTop: 20 }]}
-              onPress={async () => {
-                const permissionResult = await ImagePicker.requestCameraPermissionsAsync();
-                if (permissionResult.granted === false) {
-                  alert("You've refused to allow this app to access your camera!");
-                  return;
-                }
-                // Route to our custom glassmorphic camera screen
-                router.push({
-                  pathname: '/scan/camera',
-                  params: { occasion, gender }
-                });
-              }}
-            >
-              <IconSymbol name="camera" size={40} color="#000" />
-              <Text style={styles.photoPickerText}>Take a Photo</Text>
-            </TouchableOpacity>
+            <ActivityIndicator size="large" color="#000" />
           </View>
         )}
 
