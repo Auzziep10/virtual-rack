@@ -70,10 +70,10 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Premium Dark Background */}
+      {/* Premium Light Background */}
       <View style={StyleSheet.absoluteFill}>
         <LinearGradient
-          colors={['#000000', '#0a0a0c']}
+          colors={['#ffffff', '#f4f4f8']}
           style={StyleSheet.absoluteFill}
         />
         {/* Ambient Glows */}
