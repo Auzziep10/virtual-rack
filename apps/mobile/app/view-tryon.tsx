@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, FlatList, Dimensions, ActivityIndicator, PanResponder } from 'react-native';
+import { StyleSheet, View, TouchableOpacity, Text, FlatList, Dimensions, ActivityIndicator, PanResponder, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -119,7 +119,7 @@ export default function ViewTryOnScreen() {
 
               <TouchableOpacity 
                 style={styles.pillButton}
-                onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: item.imageUrl } })}
+                onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: encodeURIComponent(item.imageUrl) } })}
               >
                 <BlurView intensity={60} tint="light" style={styles.pillBlur}>
                   <IconSymbol name="sparkles" size={18} color="#111" />

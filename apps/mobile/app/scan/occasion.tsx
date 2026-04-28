@@ -157,7 +157,7 @@ export default function OccasionScreen() {
             >
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item, gender, ...(imageUri ? { imageUri } : {}) } })}
+                onPress={() => router.push({ pathname: '/scan/try-on', params: { occasion: item, gender, ...(imageUri ? { imageUri: encodeURIComponent(imageUri) } : {}) } })}
               >
                 <Text style={styles.itemText}>{item}</Text>
               </TouchableOpacity>
