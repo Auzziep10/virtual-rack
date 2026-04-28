@@ -3,6 +3,15 @@ import RealityKit
 import SwiftUI
 import os
 
+@available(iOS 18.0, *)
+struct iOS18ObjectCaptureWrapper: View {
+    var session: ObjectCaptureSession
+    var body: some View {
+        ObjectCaptureView(session: session)
+            .hideObjectReticle()
+    }
+}
+
 @available(iOS 17.0, *)
 class BodyScannerNativeView: ExpoView {
     let onModelReady = EventDispatcher()
@@ -46,13 +55,11 @@ class BodyScannerNativeView: ExpoView {
                 }
             }
 
-            let objectCaptureView = ObjectCaptureView(session: newSession)
-            
             let finalView: AnyView
             if #available(iOS 18.0, *) {
-                finalView = AnyView(objectCaptureView.hideObjectReticle())
+                finalView = AnyView(iOS18ObjectCaptureWrapper(session: newSession))
             } else {
-                finalView = AnyView(objectCaptureView)
+                finalView = AnyView(ObjectCaptureView(session: newSession))
             }
             
             let hc = UIHostingController(rootView: finalView)
