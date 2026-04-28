@@ -44,6 +44,7 @@ function AnimatedSplashScreen({ children }: { children: React.ReactNode }) {
   const [isSplashAnimationComplete, setAnimationComplete] = useState(false);
   const scale = useRef(new Animated.Value(1)).current;
   const opacity = useRef(new Animated.Value(1)).current;
+  const whiteFlash = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     // Simulate app loading/ready state
@@ -65,20 +66,26 @@ function AnimatedSplashScreen({ children }: { children: React.ReactNode }) {
           duration: 300,
           useNativeDriver: true,
         }),
-        // 2. Zoom aggressively and fade out
+        // 2. Zoom aggressively and fade background to white
         Animated.parallel([
           Animated.timing(scale, {
             toValue: 30, // Massive zoom
-            duration: 600,
+            duration: 500,
             useNativeDriver: true,
           }),
-          Animated.timing(opacity, {
-            toValue: 0,
-            duration: 400,
-            delay: 150, // wait slightly before fading
+          Animated.timing(whiteFlash, {
+            toValue: 1,
+            duration: 300,
+            delay: 200, // start turning white as the zoom peaks
             useNativeDriver: true,
           })
-        ])
+        ]),
+        // 3. Fade the whole white screen out
+        Animated.timing(opacity, {
+          toValue: 0,
+          duration: 300,
+          useNativeDriver: true,
+        })
       ]).start(() => {
         setAnimationComplete(true);
       });
@@ -102,6 +109,16 @@ function AnimatedSplashScreen({ children }: { children: React.ReactNode }) {
           ]}
           pointerEvents="none"
         >
+          {/* White Flash Overlay (Behind the logo) */}
+          <Animated.View
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                backgroundColor: '#ffffff',
+                opacity: whiteFlash,
+              }
+            ]}
+          />
           <Animated.Image
             source={require('../assets/images/splash-icon.png')}
             style={{
