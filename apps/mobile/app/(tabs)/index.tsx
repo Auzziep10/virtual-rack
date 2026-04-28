@@ -165,7 +165,7 @@ export default function DashboardScreen() {
                 key={item.id} 
                 style={styles.tryOnCard}
                 activeOpacity={0.8}
-                onPress={() => router.push({ pathname: '/view-tryon', params: { uri: encodeURIComponent(item.imageUrl), garmentName: item.garmentName } })}
+                onPress={() => router.push({ pathname: '/view-tryon', params: { tryOnId: item.id } })}
               >
                 <Image 
                   source={item.imageUrl} 

@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, FlatList, Dimensions, ActivityIndicator } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Text, FlatList, Dimensions, ActivityIndicator, PanResponder } from 'react-native';
 import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { BlurView } from 'expo-blur';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
 const { width, height } = Dimensions.get('window');
@@ -18,34 +18,53 @@ interface TryOnItem {
 
 export default function ViewTryOnScreen() {
   const params = useLocalSearchParams();
-  const initialUri = decodeURIComponent(params.uri as string || '');
-  const initialGarmentName = params.garmentName as string || 'Try-On Result';
+  const tryOnId = params.tryOnId as string;
   const insets = useSafeAreaInsets();
   
   const [data, setData] = useState<TryOnItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [initialIndex, setInitialIndex] = useState(0);
 
+  // Swipe to dismiss logic
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        // Only claim the gesture if the user is swiping vertically more than horizontally
+        return Math.abs(gestureState.dy) > Math.abs(gestureState.dx) && Math.abs(gestureState.dy) > 20;
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dy > 100) {
+          // Swipe down threshold met
+          router.back();
+        }
+      },
+    })
+  ).current;
+
   useEffect(() => {
     async function fetchTryOns() {
       try {
         const q = query(collection(db, 'tryOns'), orderBy('createdAt', 'desc'), limit(15));
         const querySnapshot = await getDocs(q);
-        let fetched: TryOnItem[] = querySnapshot.docs.map(doc => ({
-          id: doc.id,
-          imageUrl: doc.data().imageUrl,
-          garmentName: doc.data().garmentName || 'Try-On Result'
+        let fetched: TryOnItem[] = querySnapshot.docs.map(document => ({
+          id: document.id,
+          imageUrl: document.data().imageUrl,
+          garmentName: document.data().garmentName || 'Try-On Result'
         }));
 
         // If the clicked image isn't in the list (e.g. it's older), add it to the front
-        const foundIndex = fetched.findIndex(item => item.imageUrl === initialUri);
+        const foundIndex = fetched.findIndex(item => item.id === tryOnId);
         
-        if (foundIndex === -1 && initialUri) {
-          fetched = [
-            { id: 'initial', imageUrl: initialUri, garmentName: initialGarmentName },
-            ...fetched
-          ];
-          setInitialIndex(0);
+        if (foundIndex === -1 && tryOnId) {
+          const docRef = doc(db, 'tryOns', tryOnId);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            fetched = [
+              { id: docSnap.id, imageUrl: docSnap.data().imageUrl, garmentName: docSnap.data().garmentName || 'Try-On Result' },
+              ...fetched
+            ];
+            setInitialIndex(0);
+          }
         } else if (foundIndex !== -1) {
           setInitialIndex(foundIndex);
         }
@@ -53,17 +72,13 @@ export default function ViewTryOnScreen() {
         setData(fetched);
       } catch (error) {
         console.error("Error fetching try-ons:", error);
-        // Fallback to just showing the initial image
-        if (initialUri) {
-          setData([{ id: 'initial', imageUrl: initialUri, garmentName: initialGarmentName }]);
-        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchTryOns();
-  }, [initialUri, initialGarmentName]);
+  }, [tryOnId]);
 
   if (loading) {
     return (
@@ -74,7 +89,7 @@ export default function ViewTryOnScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       <FlatList
         data={data}
         horizontal
