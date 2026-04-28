@@ -4,7 +4,7 @@ import * as React from 'react';
 import { BodyScannerViewProps } from './BodyScanner.types';
 
 const NativeEnvironmentView: React.ComponentType<BodyScannerViewProps> =
-  requireNativeViewManager('BodyScannerNativeView');
+  requireNativeViewManager('BodyScanner', 'BodyScannerNativeView');
 
 export interface BodyScannerViewRef {
   startSession: () => Promise<void>;
