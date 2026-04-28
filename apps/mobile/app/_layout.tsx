@@ -103,7 +103,7 @@ function AnimatedSplashScreen({ children }: { children: React.ReactNode }) {
           pointerEvents="none"
         >
           <Animated.Image
-            source={require('../assets/images/wovn-logo-white.png')}
+            source={require('../assets/images/splash-icon.png')}
             style={{
               width: 200,
               height: 200,
