@@ -65,31 +65,7 @@ export default function TryOnScreen() {
     fetchGarments();
   }, [occasion]);
 
-  const hasStartedQueue = useRef(false);
-
-  // Auto-synthesize all garments sequentially to avoid Vertex AI 429 Rate Limits
-  useEffect(() => {
-    if (garments.length > 0 && currentImageUri && !hasStartedQueue.current) {
-      hasStartedQueue.current = true;
-      
-      const processQueue = async () => {
-        for (const garment of garments) {
-          // If the user already manually tapped it, skip
-          if (cachedResults[garment.id]) continue;
-          
-          try {
-            await dispatchTryOnTask(currentImageUri, garment);
-            // Wait 2 seconds between sequential generations to let Vertex API cool down
-            await new Promise(r => setTimeout(r, 2000));
-          } catch (e) {
-            console.log("Queue error:", e);
-          }
-        }
-      };
-      
-      processQueue();
-    }
-  }, [garments, currentImageUri]);
+  // Auto-synthesize removed to prevent Vertex AI 429 Rate Limits on free tiers.
 
   const handleGarmentSelect = async (garment: Garment) => {
     if (!currentImageUri || !garment.image) {
