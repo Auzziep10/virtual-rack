@@ -105,8 +105,8 @@ function AnimatedSplashScreen({ children }: { children: React.ReactNode }) {
           <Animated.Image
             source={require('../assets/images/splash-icon.png')}
             style={{
-              width: 200,
-              height: 200,
+              width: 160,
+              height: 160,
               resizeMode: 'contain',
               transform: [{ scale: scale }],
             }}
