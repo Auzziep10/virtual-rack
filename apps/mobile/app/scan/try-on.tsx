@@ -128,7 +128,7 @@ export default function TryOnScreen() {
         <Image 
           source={require('../../assets/images/wovn-logo.png')} 
           style={styles.logoImage} 
-          resizeMode="contain" 
+          contentFit="contain" 
         />
       </View>
 
@@ -219,7 +219,7 @@ export default function TryOnScreen() {
                     <Image 
                       source={{ uri: garment.image }} 
                       style={styles.bubbleImage} 
-                      resizeMode="cover" 
+                      contentFit="cover" 
                     />
                   ) : (
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
