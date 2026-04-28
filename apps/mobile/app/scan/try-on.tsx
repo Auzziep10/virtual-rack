@@ -128,7 +128,11 @@ export default function TryOnScreen() {
       {/* Background (User Scan or Final AI Output) */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#e8d8c8' }]}>
         {displayImage ? (
-          <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} contentFit="cover" />
+          <>
+            <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} contentFit="cover" blurRadius={40} />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.2)' }]} />
+            <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} contentFit="contain" />
+          </>
         ) : (
           <View style={styles.photoPickerContainer}>
             <ActivityIndicator size="large" color="#000" />

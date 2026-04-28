@@ -100,10 +100,20 @@ export default function ViewTryOnScreen() {
         keyExtractor={(item, index) => item.id || index.toString()}
         renderItem={({ item }) => (
           <View style={{ width, height: '100%' }}>
+            {/* Blurred background to fill empty space */}
             <Image 
               source={{ uri: item.imageUrl }} 
               style={StyleSheet.absoluteFill} 
               contentFit="cover" 
+              blurRadius={40}
+            />
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.3)' }]} />
+            
+            {/* The actual image, perfectly contained so no cropping occurs */}
+            <Image 
+              source={{ uri: item.imageUrl }} 
+              style={StyleSheet.absoluteFill} 
+              contentFit="contain" 
             />
             
             {/* Minimal Bottom Controls */}
