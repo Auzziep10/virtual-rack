@@ -6,22 +6,6 @@ public class BodyScannerModule: Module {
   public func definition() -> ModuleDefinition {
     Name("BodyScanner")
 
-    View(BodyScannerRoomView.self) {
-      Events("onModelReady", "onError")
-
-      AsyncFunction("startSession") { (view: BodyScannerRoomView) in
-        if #available(iOS 16.0, *) {
-          view.startSession()
-        }
-      }
-
-      AsyncFunction("stopSession") { (view: BodyScannerRoomView) in
-        if #available(iOS 16.0, *) {
-          view.stopSession()
-        }
-      }
-    }
-
     View(BodyScannerNativeView.self) {
       Events("onModelReady", "onError", "onProgress")
 

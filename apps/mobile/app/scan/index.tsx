@@ -18,23 +18,31 @@ export default function ScanningScreen() {
   const [processingProgress, setProcessingProgress] = useState(0);
   const [permission, requestPermission] = useCameraPermissions();
 
+  const isMountedRef = useRef(true);
+
   useEffect(() => {
+    isMountedRef.current = true;
     // Start the object capture session shortly after mount to ensure native view is ready
     const timer = setTimeout(async () => {
+      if (!isMountedRef.current) return;
+
       if (!permission?.granted) {
         const result = await requestPermission();
+        if (!isMountedRef.current) return;
+        
         if (!result.granted) {
           Alert.alert("Permission Required", "Camera permission is required for 3D scanning.");
           return;
         }
       }
 
-      if (scannerRef.current) {
+      if (isMountedRef.current && scannerRef.current) {
         scannerRef.current.startSession();
       }
     }, 500);
 
     return () => {
+      isMountedRef.current = false;
       clearTimeout(timer);
       // Stop the session on unmount to save battery
       if (scannerRef.current) {
