@@ -60,9 +60,20 @@ export default function ScanningScreen() {
     try {
       Alert.alert("Uploading", "Saving your 3D body scan to the cloud...");
       
-      // Fetch the local .usdz file as a Blob
-      const response = await fetch(objUri);
-      const blob = await response.blob();
+      // Fetch the local .usdz file as a Blob using XMLHttpRequest (fixes Network Request Failed for large files in RN)
+      const blob: any = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function(e) {
+          console.error("XHR Error:", e);
+          reject(new TypeError('Network request failed'));
+        };
+        xhr.responseType = 'blob';
+        xhr.open('GET', objUri, true);
+        xhr.send(null);
+      });
       
       const fileName = `scans/body_${Date.now()}_${Math.random().toString(36).substring(7)}.usdz`;
       const storageRef = ref(storage, fileName);
