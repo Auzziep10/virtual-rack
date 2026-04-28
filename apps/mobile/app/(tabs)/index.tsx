@@ -135,6 +135,7 @@ export default function DashboardScreen() {
               <Image 
                 source={{ uri: userProfile?.avatarUrl || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop' }} 
                 style={styles.avatarImage} 
+                contentFit="cover"
               />
             </BlurView>
           </TouchableOpacity>
