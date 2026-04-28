@@ -210,6 +210,28 @@ export default function DashboardScreen() {
               </View>
             </BlurView>
           </TouchableOpacity>
+
+          {/* Live Brand Catalog Sandbox */}
+          <TouchableOpacity 
+            style={styles.secondaryActionWrapper}
+            activeOpacity={0.8}
+            onPress={() => router.push('/catalog')}
+          >
+            <LinearGradient
+              colors={['rgba(255,255,255,0.08)', 'rgba(255,255,255,0.01)']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.actionCardGradient}
+            />
+            <BlurView intensity={40} tint="light" style={styles.actionCardInnerSecondary}>
+              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(0,0,0,0.05)', shadowOpacity: 0 }]}>
+                <IconSymbol name="cube.box" size={24} color="#555" />
+              </View>
+              <View style={styles.actionTextContainerSecondary}>
+                <Text style={styles.actionButtonTitleSecondary}>Live Brand Catalog</Text>
+              </View>
+            </BlurView>
+          </TouchableOpacity>
         </View>
 
         {/* My Try-Ons (Showcase Section) */}
