@@ -124,16 +124,31 @@ export function TaskProvider({ children }: { children: ReactNode }) {
 
       const result = await res.json();
 
-      if (!res.ok) {
-        throw new Error(result.error?.message);
-      }
-
-      const candidates = result.candidates;
       let base64Output = null;
-      if (candidates && candidates.length > 0) {
-        for (const part of candidates[0].content?.parts || []) {
-          if (part.inlineData) {
-            base64Output = `data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`;
+
+      if (!res.ok) {
+        if (res.status === 429) {
+          console.warn("Vertex AI rate limited. Using fallback image.");
+          // Wait 3 seconds to simulate processing
+          await new Promise(resolve => setTimeout(resolve, 3000));
+          
+          // Use the garment image as a fallback so the app doesn't break during demos
+          base64Output = `data:${garmentResult.mimeType};base64,${garmentResult.data}`;
+          
+          Alert.alert(
+            "API Rate Limit", 
+            "Google Vertex AI has temporarily rate-limited your free tier quota. We are showing a fallback image so you can continue testing the UI."
+          );
+        } else {
+          throw new Error(result.error?.message || "Unknown API Error");
+        }
+      } else {
+        const candidates = result.candidates;
+        if (candidates && candidates.length > 0) {
+          for (const part of candidates[0].content?.parts || []) {
+            if (part.inlineData) {
+              base64Output = `data:${part.inlineData.mimeType || 'image/jpeg'};base64,${part.inlineData.data}`;
+            }
           }
         }
       }
