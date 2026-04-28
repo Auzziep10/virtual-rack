@@ -250,6 +250,11 @@ export default function TryOnScreen() {
                        <PercentageProgress />
                     </View>
                   )}
+                  {cachedResults[garment.id] && !activeTasks.some(t => t.garmentId === garment.id) && (
+                    <View style={styles.cachedBadge}>
+                      <IconSymbol name="checkmark.circle.fill" size={18} color="#34C759" />
+                    </View>
+                  )}
                 </TouchableOpacity>
               </Animated.View>
             );
@@ -413,5 +418,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: '#333',
+  },
+  cachedBadge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
   },
 });
