@@ -1,7 +1,7 @@
 {
   "platforms": ["apple", "android", "web"],
   "apple": {
-    "modules": ["RoomScannerModule"]
+    "modules": ["BodyScannerModule"]
   },
   "android": {
     "modules": ["expo.modules.roomscanner.RoomScannerModule"]

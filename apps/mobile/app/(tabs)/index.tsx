@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { collection, query, orderBy, limit, getDocs, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { previewModel } from '../../modules/room-scanner';
+import { previewModel } from '../../modules/body-scanner';
 
 const { width } = Dimensions.get('window');
 

@@ -1,39 +1,39 @@
 import ExpoModulesCore
 import QuickLook
 
-@available(iOS 17.0, *)
-public class RoomScannerModule: Module {
+@available(iOS 18.0, *)
+public class BodyScannerModule: Module {
   public func definition() -> ModuleDefinition {
-    Name("RoomScanner")
+    Name("BodyScanner")
 
-    View(RoomScannerView.self) {
+    View(BodyScannerRoomView.self) {
       Events("onModelReady", "onError")
 
-      AsyncFunction("startSession") { (view: RoomScannerView) in
+      AsyncFunction("startSession") { (view: BodyScannerRoomView) in
         if #available(iOS 16.0, *) {
           view.startSession()
         }
       }
 
-      AsyncFunction("stopSession") { (view: RoomScannerView) in
+      AsyncFunction("stopSession") { (view: BodyScannerRoomView) in
         if #available(iOS 16.0, *) {
           view.stopSession()
         }
       }
     }
 
-    View(EnvironmentScannerView.self) {
+    View(BodyScannerNativeView.self) {
       Events("onModelReady", "onError", "onProgress")
 
-      AsyncFunction("startSession") { (view: EnvironmentScannerView) in
+      AsyncFunction("startSession") { (view: BodyScannerNativeView) in
           view.startSession()
       }
 
-      AsyncFunction("startCapturing") { (view: EnvironmentScannerView) in
+      AsyncFunction("startCapturing") { (view: BodyScannerNativeView) in
           view.startCapturing()
       }
 
-      AsyncFunction("stopSession") { (view: EnvironmentScannerView) in
+      AsyncFunction("stopSession") { (view: BodyScannerNativeView) in
           view.stopSession()
       }
     }

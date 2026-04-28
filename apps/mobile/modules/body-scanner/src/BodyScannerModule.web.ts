@@ -1,12 +1,12 @@
 import { registerWebModule, NativeModule } from 'expo';
 
-import { ChangeEventPayload } from './RoomScanner.types';
+import { ChangeEventPayload } from './BodyScanner.types';
 
-type RoomScannerModuleEvents = {
+type BodyScannerModuleEvents = {
   onChange: (params: ChangeEventPayload) => void;
 }
 
-class RoomScannerModule extends NativeModule<RoomScannerModuleEvents> {
+class BodyScannerModule extends NativeModule<BodyScannerModuleEvents> {
   PI = Math.PI;
   async setValueAsync(value: string): Promise<void> {
     this.emit('onChange', { value });
@@ -16,4 +16,4 @@ class RoomScannerModule extends NativeModule<RoomScannerModuleEvents> {
   }
 };
 
-export default registerWebModule(RoomScannerModule, 'RoomScannerModule');
+export default registerWebModule(BodyScannerModule, 'BodyScannerModule');

@@ -13,7 +13,7 @@ export type OnProgressEventPayload = {
   progress: number;
 };
 
-export type RoomScannerViewProps = {
+export type BodyScannerViewProps = {
   onModelReady?: (event: { nativeEvent: OnModelReadyEventPayload }) => void;
   onError?: (event: { nativeEvent: OnErrorEventPayload }) => void;
   onProgress?: (event: { nativeEvent: OnProgressEventPayload }) => void;

@@ -3,7 +3,7 @@ import RoomPlan
 import UIKit
 
 @available(iOS 16.0, *)
-class RoomScannerView: ExpoView, RoomCaptureViewDelegate, RoomCaptureSessionDelegate {
+class BodyScannerRoomView: ExpoView, RoomCaptureViewDelegate, RoomCaptureSessionDelegate {
   private var roomCaptureView: RoomCaptureView!
   private var finalResult: CapturedRoom?
   

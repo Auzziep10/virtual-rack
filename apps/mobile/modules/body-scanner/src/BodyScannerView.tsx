@@ -1,22 +1,22 @@
 import { requireNativeViewManager } from 'expo-modules-core';
 import * as React from 'react';
 
-import { RoomScannerViewProps } from './RoomScanner.types';
+import { BodyScannerViewProps } from './BodyScanner.types';
 
-const NativeView: React.ComponentType<RoomScannerViewProps> =
-  requireNativeViewManager('RoomScanner');
+const NativeView: React.ComponentType<BodyScannerViewProps> =
+  requireNativeViewManager('BodyScanner');
 
-const NativeEnvironmentView: React.ComponentType<RoomScannerViewProps> =
-  requireNativeViewManager('RoomScanner', 'EnvironmentScannerView');
+const NativeEnvironmentView: React.ComponentType<BodyScannerViewProps> =
+  requireNativeViewManager('BodyScanner', 'BodyScannerNativeView');
 
-export interface RoomScannerViewRef {
+export interface BodyScannerViewRef {
   startSession: () => Promise<void>;
   startCapturing: () => Promise<void>;
   stopSession: () => Promise<void>;
 };
 
-export const RoomScannerView = React.forwardRef<RoomScannerViewRef, RoomScannerViewProps>(
-  function RoomScannerView(props, ref) {
+export const BodyScannerView = React.forwardRef<BodyScannerViewRef, BodyScannerViewProps>(
+  function BodyScannerView(props, ref) {
     const nativeRef = React.useRef(null);
 
     React.useImperativeHandle(ref, () => ({
@@ -39,8 +39,8 @@ export const RoomScannerView = React.forwardRef<RoomScannerViewRef, RoomScannerV
   }
 );
 
-export const EnvironmentScannerView = React.forwardRef<RoomScannerViewRef, RoomScannerViewProps>(
-  function EnvironmentScannerView(props, ref) {
+export const BodyScannerNativeView = React.forwardRef<BodyScannerViewRef, BodyScannerViewProps>(
+  function BodyScannerNativeView(props, ref) {
     const nativeRef = React.useRef(null);
 
     React.useImperativeHandle(ref, () => ({

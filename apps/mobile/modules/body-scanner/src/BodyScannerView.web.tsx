@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { RoomScannerViewProps } from './RoomScanner.types';
+import { BodyScannerViewProps } from './BodyScanner.types';
 
-export default function RoomScannerView(props: RoomScannerViewProps) {
+export default function BodyScannerView(props: BodyScannerViewProps) {
   return (
     <div>
       <iframe

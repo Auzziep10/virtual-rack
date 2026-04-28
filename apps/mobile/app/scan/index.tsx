@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Alert, Image, Dimensions, Platform } from 'react-native';
-import { EnvironmentScannerView, RoomScannerViewRef } from '../../modules/room-scanner';
+import { BodyScannerNativeView, BodyScannerViewRef } from '../../modules/body-scanner';
 import { router } from 'expo-router';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +10,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function ScanningScreen() {
   const insets = useSafeAreaInsets();
-  const scannerRef = useRef<RoomScannerViewRef>(null);
+  const scannerRef = useRef<BodyScannerViewRef>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
@@ -104,10 +104,11 @@ export default function ScanningScreen() {
 
   return (
     <View style={styles.container}>
-      <EnvironmentScannerView 
+      <BodyScannerNativeView 
         ref={scannerRef} 
         style={styles.scanner} 
         onModelReady={handleModelReady}
+        onError={handleError}
         onProgress={handleProgress}
       />
       

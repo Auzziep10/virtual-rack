@@ -3,8 +3,8 @@ import RealityKit
 import SwiftUI
 import os
 
-@available(iOS 17.0, *)
-class EnvironmentScannerView: ExpoView {
+@available(iOS 18.0, *)
+class BodyScannerNativeView: ExpoView {
     let onModelReady = EventDispatcher()
     let onError = EventDispatcher()
     let onProgress = EventDispatcher()
@@ -47,6 +47,7 @@ class EnvironmentScannerView: ExpoView {
             }
 
             let objectCaptureView = ObjectCaptureView(session: newSession)
+                .hideObjectReticle()
             
             let hc = UIHostingController(rootView: AnyView(objectCaptureView))
             hc.view.frame = self.bounds
@@ -88,7 +89,7 @@ class EnvironmentScannerView: ExpoView {
         do {
             let request = PhotogrammetrySession.Request.modelFile(url: usdzFileURL)
             var config = PhotogrammetrySession.Configuration()
-            config.isObjectMaskingEnabled = true
+            config.isObjectMaskingEnabled = false
             let pSession = try PhotogrammetrySession(input: dir, configuration: config)
             
             Task {

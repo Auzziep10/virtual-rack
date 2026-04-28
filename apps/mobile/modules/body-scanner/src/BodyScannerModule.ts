@@ -1,6 +1,6 @@
 import { requireNativeModule } from 'expo-modules-core';
 
-const NativeModule = requireNativeModule('RoomScanner');
+const NativeModule = requireNativeModule('BodyScanner');
 
 export default NativeModule;
 
