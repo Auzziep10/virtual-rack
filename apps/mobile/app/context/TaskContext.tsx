@@ -103,7 +103,13 @@ export function TaskProvider({ children }: { children: ReactNode }) {
               { inlineData: { data: garmentResult.data, mimeType: garmentResult.mimeType } }
             ]
           }
-        ]
+        ],
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: {
+            aspectRatio: "3:4"
+          }
+        }
       };
 
       const res = await fetch(endpoint, {
