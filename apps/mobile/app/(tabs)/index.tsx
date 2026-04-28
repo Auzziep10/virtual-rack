@@ -6,7 +6,7 @@ import { BlurView } from 'expo-blur';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
-import { collection, query, orderBy, limit, getDocs, doc, deleteDoc } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, deleteDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { previewModel } from '../../modules/room-scanner';
 
@@ -16,6 +16,7 @@ export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const [tryOns, setTryOns] = useState<any[]>([]);
   const [scans, setScans] = useState<any[]>([]);
+  const [userProfile, setUserProfile] = useState<any>(null);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -46,9 +47,21 @@ export default function DashboardScreen() {
           console.error("Error fetching scans:", error);
         }
       }
+      async function fetchProfile() {
+        try {
+          const docRef = doc(db, 'users', 'prototype_user');
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserProfile(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
       
       fetchTryOns();
       fetchScans();
+      fetchProfile();
     }, [])
   );
 
@@ -117,12 +130,14 @@ export default function DashboardScreen() {
               tintColor="#000000"
             />
           </View>
-          <BlurView intensity={20} tint="light" style={styles.avatarContainer}>
-            <Image 
-              source={{ uri: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop' }} 
-              style={styles.avatarImage} 
-            />
-          </BlurView>
+          <TouchableOpacity onPress={() => router.push('/profile')} activeOpacity={0.8}>
+            <BlurView intensity={20} tint="light" style={styles.avatarContainer}>
+              <Image 
+                source={{ uri: userProfile?.avatarUrl || 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=200&h=200&fit=crop' }} 
+                style={styles.avatarImage} 
+              />
+            </BlurView>
+          </TouchableOpacity>
         </View>
 
         {/* Hero Actions */}
