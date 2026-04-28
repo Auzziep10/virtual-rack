@@ -19,6 +19,9 @@ export const techPackApp = !getApps().some(app => app.name === 'techPackApp')
   ? initializeApp(techPackFirebaseConfig, 'techPackApp') 
   : getApp('techPackApp');
 
+import { getAuth } from "firebase/auth";
+
 // Get references to Firebase services for the Tech Pack database
+export const techPackAuth = getAuth(techPackApp);
 export const techPackStorage = getStorage(techPackApp);
 export const techPackDb = getFirestore(techPackApp);

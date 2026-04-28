@@ -125,7 +125,7 @@ export default function ProfileScreen() {
           <IconSymbol name="chevron.left" size={24} color="#111" />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>My Profile</Text>
-        <View style={{ width: 44 }} /> {/* Balance for back button */}
+        <View style={{ width: 44 }} />
       </View>
 
       <ScrollView 

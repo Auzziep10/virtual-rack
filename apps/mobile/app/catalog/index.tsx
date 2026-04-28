@@ -4,7 +4,8 @@ import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, orderBy, query, limit } from 'firebase/firestore';
-import { techPackDb } from '../../lib/techPackFirebase';
+import { signInAnonymously } from 'firebase/auth';
+import { techPackDb, techPackAuth } from '../../lib/techPackFirebase';
 import { IconSymbol } from '../../components/ui/icon-symbol';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -16,6 +17,8 @@ export default function BrandCatalogScreen() {
   useEffect(() => {
     const fetchTechPacks = async () => {
       try {
+        await signInAnonymously(techPackAuth);
+        
         const q = query(
           collection(techPackDb, 'techPacks'),
           orderBy('updatedAt', 'desc'),
