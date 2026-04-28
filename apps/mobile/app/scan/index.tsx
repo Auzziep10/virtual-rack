@@ -60,11 +60,11 @@ export default function ScanningScreen() {
     try {
       Alert.alert("Uploading", "Saving your 3D body scan to the cloud...");
       
-      // Fetch the local .obj file as a Blob
+      // Fetch the local .usdz file as a Blob
       const response = await fetch(objUri);
       const blob = await response.blob();
       
-      const fileName = `scans/body_${Date.now()}_${Math.random().toString(36).substring(7)}.obj`;
+      const fileName = `scans/body_${Date.now()}_${Math.random().toString(36).substring(7)}.usdz`;
       const storageRef = ref(storage, fileName);
       
       // Upload to Firebase Storage
@@ -78,13 +78,13 @@ export default function ScanningScreen() {
       });
       
       Alert.alert("Success", "3D Scan saved successfully!");
-      console.log("Uploaded obj URL:", downloadUrl);
+      console.log("Uploaded usdz URL:", downloadUrl);
       
       // Return to dashboard after saving
       setIsProcessing(false);
       router.navigate('/(tabs)');
     } catch (error) {
-      console.error("Failed to upload .obj:", error);
+      console.error("Failed to upload .usdz:", error);
       Alert.alert("Error", "Could not save the 3D scan.");
       setIsProcessing(false);
       router.navigate('/(tabs)');
