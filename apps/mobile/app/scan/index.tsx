@@ -8,16 +8,27 @@ import { db, storage } from '@/lib/firebase';
 import { collection, addDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
+import { useCameraPermissions } from 'expo-camera';
+
 export default function ScanningScreen() {
   const insets = useSafeAreaInsets();
   const scannerRef = useRef<BodyScannerViewRef>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
     // Start the object capture session shortly after mount to ensure native view is ready
-    const timer = setTimeout(() => {
+    const timer = setTimeout(async () => {
+      if (!permission?.granted) {
+        const result = await requestPermission();
+        if (!result.granted) {
+          Alert.alert("Permission Required", "Camera permission is required for 3D scanning.");
+          return;
+        }
+      }
+
       if (scannerRef.current) {
         scannerRef.current.startSession();
       }
