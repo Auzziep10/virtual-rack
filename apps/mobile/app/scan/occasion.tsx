@@ -52,13 +52,29 @@ export default function OccasionScreen() {
   const listPadding = halfScreen - (ITEM_HEIGHT / 2);
 
   return (
-    <View style={[styles.container, { backgroundColor: '#fafafa' }]}>
+    <View style={styles.container}>
+      {/* Dynamic Background */}
+      {imageUri ? (
+        <>
+          <Image 
+            source={{ uri: decodeURIComponent(imageUri) }} 
+            style={StyleSheet.absoluteFill} 
+            contentFit="cover" 
+            blurRadius={60} 
+          />
+          {/* Light overlay to ensure the black text remains readable on dark photos */}
+          <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(255,255,255,0.5)' }]} />
+        </>
+      ) : (
+        <View style={[StyleSheet.absoluteFill, { backgroundColor: '#fafafa' }]} />
+      )}
+
       {/* Top Bar */}
       <View style={[styles.topBar, { top: insets.top + 20 }]}>
         <Image 
           source={require('../../assets/images/wovn-logo.png')} 
           style={styles.logoImage} 
-          resizeMode="contain" 
+          contentFit="contain" 
         />
       </View>
 
