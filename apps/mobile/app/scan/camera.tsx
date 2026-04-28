@@ -88,31 +88,10 @@ export default function CustomCameraScreen() {
       setCountdown(null); // Clear countdown AFTER taking the picture to prevent re-render crash
       
       if (photo && photo.uri) {
-        let finalUri = photo.uri;
-        
-        // Fix EXIF orientation manually if needed since ImageManipulator strips it later
-        if (photo.exif && photo.exif.Orientation) {
-          const orientation = parseInt(photo.exif.Orientation, 10);
-          let rotate = 0;
-          
-          if (orientation === 6) rotate = 90;
-          else if (orientation === 3) rotate = 180;
-          else if (orientation === 8) rotate = 270;
-          
-          if (rotate !== 0) {
-            const manipResult = await ImageManipulator.manipulateAsync(
-              photo.uri,
-              [{ rotate }],
-              { compress: 1, format: ImageManipulator.SaveFormat.JPEG }
-            );
-            finalUri = manipResult.uri;
-          }
-        }
-        
         // Go back to occasion screen with the new photo URI
         router.replace({ 
           pathname: '/scan/occasion', 
-          params: { imageUri: finalUri } 
+          params: { imageUri: photo.uri } 
         });
       }
     } catch (error) {
