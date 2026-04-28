@@ -9,16 +9,19 @@ public class BodyScannerModule: Module {
     View(BodyScannerNativeView.self) {
       Events("onModelReady", "onError", "onProgress")
 
-      AsyncFunction("startSession") { (view: BodyScannerNativeView) in
+      AsyncFunction("startSession") { (view: BodyScannerNativeView) -> Bool in
           view.startSession()
+          return true
       }
 
-      AsyncFunction("startCapturing") { (view: BodyScannerNativeView) in
+      AsyncFunction("startCapturing") { (view: BodyScannerNativeView) -> Bool in
           view.startCapturing()
+          return true
       }
 
-      AsyncFunction("stopSession") { (view: BodyScannerNativeView) in
+      AsyncFunction("stopSession") { (view: BodyScannerNativeView) -> Bool in
           view.stopSession()
+          return true
       }
     }
 
