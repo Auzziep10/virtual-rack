@@ -215,7 +215,7 @@ export default function DashboardScreen() {
         {/* My Scans (Technical Data) */}
         <View style={[styles.sectionHeader, { marginTop: 40 }]}>
           <Text style={styles.sectionTitle}>Body Scans</Text>
-          <TouchableOpacity onPress={() => Alert.alert("Manage Scans", "To delete a 3D scan, simply long-press on it.")}>
+          <TouchableOpacity hitSlop={{top: 15, bottom: 15, left: 15, right: 15}} onPress={() => Alert.alert("Manage Scans", "To delete a 3D scan, simply long-press on it.")}>
             <Text style={styles.seeAll}>Manage</Text>
           </TouchableOpacity>
         </View>
