@@ -107,7 +107,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
         generationConfig: {
           responseModalities: ["IMAGE"],
           imageConfig: {
-            aspectRatio: "3:4"
+            aspectRatio: "9:16"
           }
         }
       };
