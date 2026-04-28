@@ -3,7 +3,7 @@ import RealityKit
 import SwiftUI
 import os
 
-@available(iOS 18.0, *)
+@available(iOS 17.0, *)
 class BodyScannerNativeView: ExpoView {
     let onModelReady = EventDispatcher()
     let onError = EventDispatcher()
@@ -47,9 +47,15 @@ class BodyScannerNativeView: ExpoView {
             }
 
             let objectCaptureView = ObjectCaptureView(session: newSession)
-                .hideObjectReticle()
             
-            let hc = UIHostingController(rootView: AnyView(objectCaptureView))
+            let finalView: AnyView
+            if #available(iOS 18.0, *) {
+                finalView = AnyView(objectCaptureView.hideObjectReticle())
+            } else {
+                finalView = AnyView(objectCaptureView)
+            }
+            
+            let hc = UIHostingController(rootView: finalView)
             hc.view.frame = self.bounds
             hc.view.backgroundColor = .clear
             self.insertSubview(hc.view, at: 0)

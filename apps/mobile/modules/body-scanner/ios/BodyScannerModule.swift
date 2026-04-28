@@ -1,7 +1,7 @@
 import ExpoModulesCore
 import QuickLook
 
-@available(iOS 18.0, *)
+@available(iOS 17.0, *)
 public class BodyScannerModule: Module {
   public func definition() -> ModuleDefinition {
     Name("BodyScanner")
