@@ -91,7 +91,7 @@ export default function DashboardScreen() {
               source={require('../../assets/images/wovn-logo.png')} 
               style={styles.logoImage} 
               contentFit="contain" 
-              tintColor="#ffffff"
+              tintColor="#000000"
             />
           </View>
           <BlurView intensity={20} tint="light" style={styles.avatarContainer}>
@@ -116,9 +116,9 @@ export default function DashboardScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.actionCardGradient}
             />
-            <BlurView intensity={30} tint="dark" style={styles.actionCardInner}>
+            <BlurView intensity={40} tint="light" style={styles.actionCardInner}>
               <View style={styles.iconWrapper}>
-                <IconSymbol name="camera.viewfinder" size={32} color="#fff" />
+                <IconSymbol name="camera.viewfinder" size={32} color="#111" />
               </View>
               <View style={styles.actionTextContainer}>
                 <Text style={styles.actionButtonTitle}>Virtual Try-On</Text>
@@ -139,9 +139,9 @@ export default function DashboardScreen() {
               end={{ x: 1, y: 1 }}
               style={styles.actionCardGradient}
             />
-            <BlurView intensity={30} tint="dark" style={styles.actionCardInnerSecondary}>
-              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-                <IconSymbol name="person.crop.circle.badge.plus" size={24} color="#aaa" />
+            <BlurView intensity={40} tint="light" style={styles.actionCardInnerSecondary}>
+              <View style={[styles.iconWrapper, { backgroundColor: 'rgba(0,0,0,0.05)', shadowOpacity: 0 }]}>
+                <IconSymbol name="person.crop.circle.badge.plus" size={24} color="#555" />
               </View>
               <View style={styles.actionTextContainerSecondary}>
                 <Text style={styles.actionButtonTitleSecondary}>3D Body Scan</Text>
@@ -183,7 +183,7 @@ export default function DashboardScreen() {
             ))
           ) : (
             <View style={styles.tryOnCardEmpty}>
-              <IconSymbol name="photo.on.rectangle.angled" size={40} color="rgba(255,255,255,0.2)" />
+              <IconSymbol name="photo.on.rectangle.angled" size={40} color="rgba(0,0,0,0.15)" />
               <Text style={styles.emptyText}>No try-ons yet</Text>
             </View>
           )}
@@ -206,12 +206,12 @@ export default function DashboardScreen() {
                 activeOpacity={0.8}
                 onPress={() => handleScanPress(item)}
               >
-                <BlurView intensity={20} tint="dark" style={styles.scanCardInner}>
+                <BlurView intensity={40} tint="light" style={styles.scanCardInner}>
                   <View style={styles.scanIconContainer}>
                     {downloadingScan === item.id ? (
-                      <ActivityIndicator size="small" color="#fff" />
+                      <ActivityIndicator size="small" color="#000" />
                     ) : (
-                      <IconSymbol name="cube.transparent" size={28} color="rgba(255,255,255,0.8)" />
+                      <IconSymbol name="cube.transparent" size={28} color="#111" />
                     )}
                   </View>
                   <View style={styles.scanTextContainer}>
@@ -225,8 +225,8 @@ export default function DashboardScreen() {
             ))
           ) : (
             <View style={[styles.scanCardWrapper, { width: '100%' }]}>
-              <BlurView intensity={20} tint="dark" style={[styles.scanCardInner, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
-                <IconSymbol name="cube.transparent" size={24} color="rgba(255,255,255,0.3)" style={{ marginRight: 12 }} />
+              <BlurView intensity={40} tint="light" style={[styles.scanCardInner, { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }]}>
+                <IconSymbol name="cube.transparent" size={24} color="rgba(0,0,0,0.3)" style={{ marginRight: 12 }} />
                 <Text style={styles.emptyText}>No scans yet</Text>
               </BlurView>
             </View>
@@ -240,7 +240,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#fafafa',
   },
   ambientGlowTop: {
     position: 'absolute',
@@ -249,7 +249,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'rgba(138, 43, 226, 0.15)',
+    backgroundColor: 'rgba(0, 0, 0, 0.02)',
     transform: [{ scale: 1.5 }],
   },
   ambientGlowBottom: {
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     width: 250,
     height: 250,
     borderRadius: 125,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(0, 0, 0, 0.01)',
     transform: [{ scale: 2 }],
   },
   scrollContent: {
@@ -274,7 +274,7 @@ const styles = StyleSheet.create({
   },
   greeting: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
+    color: '#888',
     marginBottom: 6,
     fontWeight: '500',
     letterSpacing: 1,
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(0,0,0,0.05)',
   },
   avatarImage: {
     width: '100%',
@@ -307,7 +307,12 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.06,
+    shadowRadius: 16,
+    elevation: 4,
   },
   actionCardGradient: {
     ...StyleSheet.absoluteFillObject,
@@ -322,9 +327,14 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 2,
   },
   actionTextContainer: {
     marginTop: 12,
@@ -332,13 +342,13 @@ const styles = StyleSheet.create({
   actionButtonTitle: {
     fontSize: 22,
     fontWeight: '600',
-    color: '#fff',
+    color: '#111',
     letterSpacing: -0.5,
     marginBottom: 4,
   },
   actionButtonSubtitle: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
+    color: '#666',
   },
   secondaryActionWrapper: {
     width: '100%',
@@ -346,7 +356,12 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
   actionCardInnerSecondary: {
     flex: 1,
@@ -361,7 +376,7 @@ const styles = StyleSheet.create({
   actionButtonTitleSecondary: {
     fontSize: 18,
     fontWeight: '500',
-    color: '#ddd',
+    color: '#333',
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -372,12 +387,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#fff',
+    color: '#111',
     letterSpacing: -0.5,
   },
   seeAll: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.5)',
+    color: '#111',
     fontWeight: '500',
   },
   horizontalScroll: {
@@ -390,7 +405,13 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    elevation: 3,
   },
   tryOnImage: {
     width: '100%',
@@ -409,14 +430,17 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   tryOnCardEmpty: {
     width: 160,
     height: 220,
     borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.03)',
+    backgroundColor: 'rgba(255,255,255,0.8)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(0,0,0,0.05)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -430,22 +454,32 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
+    borderColor: 'rgba(255,255,255,0.8)',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    elevation: 2,
   },
   scanCardInner: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 16,
+    backgroundColor: 'rgba(255,255,255,0.5)',
   },
   scanIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: '#fff',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
   },
   scanTextContainer: {
     flex: 1,
@@ -454,15 +488,15 @@ const styles = StyleSheet.create({
   scanCardTitle: {
     fontSize: 16,
     fontWeight: '500',
-    color: '#fff',
+    color: '#222',
     marginBottom: 4,
   },
   scanCardDate: {
     fontSize: 13,
-    color: 'rgba(255,255,255,0.4)',
+    color: '#888',
   },
   emptyText: {
-    color: 'rgba(255,255,255,0.4)',
+    color: '#888',
     fontSize: 14,
     fontWeight: '500',
   },
