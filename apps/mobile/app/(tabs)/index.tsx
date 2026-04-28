@@ -104,6 +104,29 @@ export default function DashboardScreen() {
     );
   };
 
+  const handleDeleteTryOn = (tryOnId: string) => {
+    Alert.alert(
+      "Delete Try-On",
+      "Are you sure you want to delete this virtual try-on image?",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, 'tryOns', tryOnId));
+              setTryOns(prev => prev.filter(t => t.id !== tryOnId));
+            } catch (error) {
+              console.error("Error deleting try-on:", error);
+              Alert.alert("Error", "Failed to delete try-on.");
+            }
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Premium Light Background */}
@@ -205,6 +228,7 @@ export default function DashboardScreen() {
                 style={styles.tryOnCard}
                 activeOpacity={0.8}
                 onPress={() => router.push({ pathname: '/view-tryon', params: { tryOnId: item.id } })}
+                onLongPress={() => handleDeleteTryOn(item.id)}
               >
                 <Image 
                   source={item.imageUrl} 
