@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "WOVN",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -12,10 +12,10 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.auzziep.mobile",
       "infoPlist": {
-        "NSCameraUsageDescription": "Location Scout needs access to the camera to perform RoomPlan LiDAR scans.",
-        "NSMicrophoneUsageDescription": "Location Scout needs microphone access.",
-        "NSPhotoLibraryUsageDescription": "Location Scout needs access to save 3D models.",
-        "NSMotionUsageDescription": "Location Scout needs motion data to accurately track the camera for 3D environment generation.",
+        "NSCameraUsageDescription": "WOVN needs access to the camera to perform RoomPlan LiDAR scans.",
+        "NSMicrophoneUsageDescription": "WOVN needs microphone access.",
+        "NSPhotoLibraryUsageDescription": "WOVN needs access to save 3D models.",
+        "NSMotionUsageDescription": "WOVN needs motion data to accurately track the camera for 3D environment generation.",
         "ITSAppUsesNonExemptEncryption": false
       }
     },
