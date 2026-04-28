@@ -83,12 +83,12 @@ class EnvironmentScannerView: ExpoView {
         guard let dir = scanDir else { return }
         
         let documentDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let usdzFileURL = documentDir.appendingPathComponent("EnvironmentScan_\(UUID().uuidString).usdz")
+        let usdzFileURL = documentDir.appendingPathComponent("BodyScan_\(UUID().uuidString).usdz")
         
         do {
             let request = PhotogrammetrySession.Request.modelFile(url: usdzFileURL)
             var config = PhotogrammetrySession.Configuration()
-            config.isObjectMaskingEnabled = false
+            config.isObjectMaskingEnabled = true
             let pSession = try PhotogrammetrySession(input: dir, configuration: config)
             
             Task {
