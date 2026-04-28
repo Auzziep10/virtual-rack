@@ -18,6 +18,27 @@ interface Garment {
   image: string;
 }
 
+const PercentageProgress = () => {
+  const [percent, setPercent] = useState(0);
+
+  useEffect(() => {
+    // Aim to reach 95% in roughly 15-20 seconds
+    const interval = setInterval(() => {
+      setPercent(p => {
+        // Slows down as it gets closer to 95%
+        if (p < 50) return p + 2;
+        if (p < 80) return p + 1;
+        if (p < 95) return p + Math.floor(Math.random() * 2); // Random 0 or 1
+        return p;
+      });
+    }, 300);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return <Text style={{ color: '#fff', fontSize: 13, fontWeight: '700' }}>{percent}%</Text>;
+};
+
 export default function TryOnScreen() {
   const params = useLocalSearchParams();
   const occasion = params.occasion || 'Casual';
@@ -225,8 +246,8 @@ export default function TryOnScreen() {
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
                   )}
                   {activeTasks.some(t => t.garmentId === garment.id) && (
-                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}>
-                       <ActivityIndicator size="small" color="#fff" />
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}>
+                       <PercentageProgress />
                     </View>
                   )}
                 </TouchableOpacity>
