@@ -106,17 +106,26 @@ export default function ViewTryOnScreen() {
               contentFit="cover" 
             />
             
-            {/* Bottom Info Area Per Image */}
-            <View style={[styles.bottomInfoContainer, { paddingBottom: insets.bottom + 20 }]}>
-              <BlurView intensity={60} tint="extraLight" style={styles.bottomBlur}>
-                <Text style={styles.garmentName} numberOfLines={1}>{item.garmentName}</Text>
-                <TouchableOpacity 
-                  style={styles.tryMoreButton}
-                  onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: item.imageUrl } })}
-                >
-                  <Text style={styles.tryMoreText}>Try More on this Photo</Text>
-                </TouchableOpacity>
-              </BlurView>
+            {/* Minimal Bottom Controls */}
+            <View style={[styles.bottomControls, { paddingBottom: insets.bottom + 20 }]}>
+              <TouchableOpacity 
+                style={styles.circleButton}
+                onPress={() => Alert.alert("Garment Info", item.garmentName)}
+              >
+                <BlurView intensity={60} tint="light" style={styles.circleBlur}>
+                  <IconSymbol name="info.circle" size={22} color="#111" />
+                </BlurView>
+              </TouchableOpacity>
+
+              <TouchableOpacity 
+                style={styles.pillButton}
+                onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: item.imageUrl } })}
+              >
+                <BlurView intensity={60} tint="light" style={styles.pillBlur}>
+                  <IconSymbol name="sparkles" size={18} color="#111" />
+                  <Text style={styles.pillText}>Try More</Text>
+                </BlurView>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -166,51 +175,56 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  bottomInfoContainer: {
+  bottomControls: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 20,
+    gap: 12,
     zIndex: 10,
   },
-  bottomBlur: {
-    borderRadius: 30,
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    alignItems: 'center',
+  circleButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.8)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.05,
-    shadowRadius: 16,
-  },
-  garmentName: {
-    color: '#111',
-    fontSize: 20,
-    fontWeight: '700',
-    textAlign: 'center',
-    marginBottom: 20,
-    letterSpacing: -0.5,
-  },
-  tryMoreButton: {
-    backgroundColor: '#111',
-    paddingHorizontal: 24,
-    paddingVertical: 16,
-    borderRadius: 30,
-    width: '100%',
-    alignItems: 'center',
-    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
   },
-  tryMoreText: {
-    color: '#fff',
+  circleBlur: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.6)',
+  },
+  pillButton: {
+    height: 50,
+    borderRadius: 25,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+  },
+  pillBlur: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.6)',
+    gap: 8,
+  },
+  pillText: {
+    color: '#111',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   }
 });
