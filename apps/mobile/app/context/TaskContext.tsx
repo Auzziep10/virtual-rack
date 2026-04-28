@@ -90,7 +90,7 @@ export function TaskProvider({ children }: { children: ReactNode }) {
       // 2. Vertex AI
       const projectId = app.options.projectId || 'virtual-rack';
       const apiKey = app.options.apiKey;
-      const model = 'gemini-2.5-pro';
+      const model = 'gemini-2.5-flash-image';
       const endpoint = `https://firebasevertexai.googleapis.com/v1beta/projects/${projectId}/locations/us-central1/publishers/google/models/${model}:generateContent`;
 
       const payload = {
