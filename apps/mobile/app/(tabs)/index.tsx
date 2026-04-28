@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Dimensions, ActivityIndicator, Alert } from 'react-native';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { BlurView } from 'expo-blur';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, doc, deleteDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { previewModel } from '../../modules/room-scanner';
 
@@ -66,6 +66,29 @@ export default function DashboardScreen() {
     } finally {
       setDownloadingScan(null);
     }
+  };
+
+  const handleDeleteScan = (scanId: string) => {
+    Alert.alert(
+      "Delete Scan",
+      "Are you sure you want to delete this 3D Body Scan? This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Delete", 
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteDoc(doc(db, 'scans', scanId));
+              setScans(prev => prev.filter(s => s.id !== scanId));
+            } catch (error) {
+              console.error("Error deleting scan:", error);
+              Alert.alert("Error", "Failed to delete scan.");
+            }
+          }
+        }
+      ]
+    );
   };
 
   return (
@@ -153,7 +176,7 @@ export default function DashboardScreen() {
         {/* My Try-Ons (Showcase Section) */}
         <View style={styles.sectionHeader}>
           <Text style={styles.sectionTitle}>My Try-Ons</Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => tryOns.length > 0 && router.push({ pathname: '/view-tryon', params: { tryOnId: tryOns[0].id } })}>
             <Text style={styles.seeAll}>See All</Text>
           </TouchableOpacity>
         </View>
@@ -205,6 +228,7 @@ export default function DashboardScreen() {
                 style={styles.scanCardWrapper}
                 activeOpacity={0.8}
                 onPress={() => handleScanPress(item)}
+                onLongPress={() => handleDeleteScan(item.id)}
               >
                 <BlurView intensity={40} tint="light" style={styles.scanCardInner}>
                   <View style={styles.scanIconContainer}>
