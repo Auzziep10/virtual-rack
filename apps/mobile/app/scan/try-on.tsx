@@ -64,6 +64,20 @@ export default function TryOnScreen() {
     fetchGarments();
   }, [occasion]);
 
+  // Auto-synthesize all garments in the background
+  useEffect(() => {
+    if (garments.length > 0 && currentImageUri) {
+      garments.forEach((garment, index) => {
+        // Stagger the requests by 1.5 seconds each to avoid API rate limits
+        setTimeout(() => {
+          if (!cachedResults[garment.id] && !activeTasks.some(t => t.garmentId === garment.id)) {
+            dispatchTryOnTask(currentImageUri, garment);
+          }
+        }, index * 1500);
+      });
+    }
+  }, [garments, currentImageUri]);
+
   const handleGarmentSelect = async (garment: Garment) => {
     if (!currentImageUri || !garment.image) {
       Alert.alert("Missing Media", "Make sure you took a photo and selected a garment.");
@@ -220,6 +234,11 @@ export default function TryOnScreen() {
                     />
                   ) : (
                     <View style={[StyleSheet.absoluteFill, { backgroundColor: garment.color || '#ccc', borderRadius: 28 }]} />
+                  )}
+                  {activeTasks.some(t => t.garmentId === garment.id) && (
+                    <View style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(0,0,0,0.5)', borderRadius: 28, justifyContent: 'center', alignItems: 'center' }]}>
+                       <ActivityIndicator size="small" color="#fff" />
+                    </View>
                   )}
                 </TouchableOpacity>
               </Animated.View>
