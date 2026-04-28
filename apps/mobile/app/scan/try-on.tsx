@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, View, Text, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
+import { StyleSheet, View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Animated, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { IconSymbol } from '@/components/ui/icon-symbol';
@@ -118,7 +119,7 @@ export default function TryOnScreen() {
       {/* Background (User Scan or Final AI Output) */}
       <View style={[StyleSheet.absoluteFill, { backgroundColor: '#e8d8c8' }]}>
         {displayImage ? (
-          <Image source={{ uri: displayImage }} style={StyleSheet.absoluteFill} resizeMode="cover" />
+          <Image source={displayImage} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <View style={styles.photoPickerContainer}>
             <ActivityIndicator size="large" color="#000" />
