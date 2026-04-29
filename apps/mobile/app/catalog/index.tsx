@@ -21,7 +21,6 @@ export default function BrandCatalogScreen() {
         
         const q = query(
           collection(techPackDb, 'techPacks'),
-          orderBy('updatedAt', 'desc'),
           limit(20)
         );
         const snapshot = await getDocs(q);
