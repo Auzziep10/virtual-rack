@@ -82,7 +82,7 @@ export default function BrandCatalogScreen() {
                   style={styles.cardImage} 
                   contentFit="cover" 
                 />
-                <BlurView intensity={60} tint="systemUltraThinMaterialLight" style={styles.cardInfo}>
+                <BlurView intensity={100} tint="systemThinMaterialLight" style={styles.cardInfo}>
                   <Text style={styles.cardTitle}>{pack.name || pack.packName || 'Untitled Garment'}</Text>
                   <Text style={styles.cardCompany}>{pack.companyId || pack.companyName || 'Unknown Brand'}</Text>
                   {pack.scannedModelUrl && (
