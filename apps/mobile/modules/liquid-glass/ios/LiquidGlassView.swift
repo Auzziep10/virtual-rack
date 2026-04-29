@@ -30,6 +30,7 @@ public class LiquidGlassNativeView: ExpoView {
   public required init(appContext: AppContext? = nil) {
     super.init(appContext: appContext)
     self.backgroundColor = .clear
+    self.isOpaque = false
     self.clipsToBounds = true
     
     setupView()
@@ -40,6 +41,7 @@ public class LiquidGlassNativeView: ExpoView {
       let swiftUIView = SwiftUILiquidGlassView(props: glassProps)
       let host = UIHostingController(rootView: swiftUIView)
       host.view.backgroundColor = .clear
+      host.view.isOpaque = false
       
       self.addSubview(host.view)
       self.hostingController = host
