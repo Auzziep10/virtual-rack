@@ -2,12 +2,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { BlurView } from 'expo-blur';
-import { LiquidGlassView } from '../../modules/liquid-glass/src';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import { useIsFocused } from '@react-navigation/native';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 export default function CustomCameraScreen() {
@@ -103,18 +101,14 @@ export default function CustomCameraScreen() {
     }
   };
 
-  const isFocused = useIsFocused();
-
   return (
     <View style={styles.container}>
-      {isFocused && <CameraView style={styles.camera} facing={facing} ref={cameraRef} />}
-      
-      <View style={[StyleSheet.absoluteFill, { justifyContent: 'space-between' }]}>
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+        
         {/* Top Controls Overlay */}
-        <LiquidGlassView 
-          cornerRadius={30}
-          tint="dark" 
-          interactive={true}
+        <BlurView 
+          intensity={100} 
+          tint="systemThinMaterialDark" 
           style={[styles.topControls, { paddingTop: insets.top + 10 }]}
         >
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
@@ -133,7 +127,7 @@ export default function CustomCameraScreen() {
           <TouchableOpacity style={styles.iconButton} onPress={toggleCameraFacing}>
             <IconSymbol name="camera.rotate" size={24} color="#fff" />
           </TouchableOpacity>
-        </LiquidGlassView>
+        </BlurView>
 
         {/* Huge Countdown Display */}
         <View style={[styles.countdownContainer, { opacity: countdown !== null ? 1 : 0 }]}>
@@ -141,10 +135,9 @@ export default function CustomCameraScreen() {
         </View>
 
         {/* Bottom Controls Overlay */}
-        <LiquidGlassView 
-          cornerRadius={40}
-          tint="dark" 
-          interactive={true}
+        <BlurView 
+          intensity={100} 
+          tint="systemThinMaterialDark" 
           style={[styles.bottomControls, { paddingBottom: insets.bottom + 30 }]}
         >
           <TouchableOpacity style={styles.libraryButton} onPress={pickFromLibrary}>
@@ -163,8 +156,9 @@ export default function CustomCameraScreen() {
           
           {/* Empty view for flex balance */}
           <View style={{ width: 44 }} />
-        </LiquidGlassView>
-      </View>
+        </BlurView>
+        
+      </CameraView>
     </View>
   );
 }
