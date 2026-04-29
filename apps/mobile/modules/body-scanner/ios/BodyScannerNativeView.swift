@@ -100,9 +100,12 @@ class BodyScannerNativeView: ExpoView {
         let usdzFileURL = documentDir.appendingPathComponent("BodyScan_\(UUID().uuidString).usdz")
         
         do {
-            let request = PhotogrammetrySession.Request.modelFile(url: usdzFileURL)
+            // Use .reduced detail and sequential ordering to prevent Memory/CoreOC Error 6 on iPhones
+            let request = PhotogrammetrySession.Request.modelFile(url: usdzFileURL, detail: .reduced)
             var config = PhotogrammetrySession.Configuration()
             config.isObjectMaskingEnabled = false
+            config.sampleOrdering = .sequential
+            config.featureSensitivity = .high
             let pSession = try PhotogrammetrySession(input: dir, configuration: config)
             
             Task {
