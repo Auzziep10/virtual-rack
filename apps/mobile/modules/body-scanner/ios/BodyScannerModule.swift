@@ -11,24 +11,30 @@ public class BodyScannerModule: Module {
     }
 
     AsyncFunction("startSession") { (viewTag: Int, promise: Promise) in
-        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
-            view.startSession()
+        DispatchQueue.main.async {
+            if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+                view.startSession()
+            }
+            promise.resolve(nil)
         }
-        promise.resolve(nil)
     }
 
     AsyncFunction("startCapturing") { (viewTag: Int, promise: Promise) in
-        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
-            view.startCapturing()
+        DispatchQueue.main.async {
+            if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+                view.startCapturing()
+            }
+            promise.resolve(nil)
         }
-        promise.resolve(nil)
     }
 
     AsyncFunction("stopSession") { (viewTag: Int, promise: Promise) in
-        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
-            view.stopSession()
+        DispatchQueue.main.async {
+            if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+                view.stopSession()
+            }
+            promise.resolve(nil)
         }
-        promise.resolve(nil)
     }
 
     AsyncFunction("previewModel") { (urlString: String, promise: Promise) in
