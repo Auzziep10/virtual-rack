@@ -71,6 +71,12 @@ public class LiquidGlassNativeView: ExpoView {
     }
   }
 
+  public func updateFallbackView() {
+    guard let fallback = fallbackView else { return }
+    let blurStyle: UIBlurEffect.Style = glassProps.tint == "dark" ? .systemThinMaterialDark : (glassProps.tint == "light" ? .systemThinMaterialLight : .systemThinMaterial)
+    fallback.effect = UIBlurEffect(style: blurStyle)
+  }
+
   public override func layoutSubviews() {
     super.layoutSubviews()
     
@@ -83,9 +89,6 @@ public class LiquidGlassNativeView: ExpoView {
       fallback.frame = self.bounds
       fallback.layer.cornerRadius = CGFloat(glassProps.cornerRadius)
       fallback.clipsToBounds = true
-      
-      let blurStyle: UIBlurEffect.Style = glassProps.tint == "dark" ? .systemThinMaterialDark : (glassProps.tint == "light" ? .systemThinMaterialLight : .systemThinMaterial)
-      fallback.effect = UIBlurEffect(style: blurStyle)
       
       self.sendSubviewToBack(fallback)
     }

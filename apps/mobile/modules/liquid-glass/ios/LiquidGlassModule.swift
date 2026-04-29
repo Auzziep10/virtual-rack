@@ -11,6 +11,7 @@ public class LiquidGlassModule: Module {
       
       Prop("tint") { (view: LiquidGlassNativeView, tint: String?) in
         view.glassProps.tint = tint ?? "light"
+        view.updateFallbackView()
       }
       
       Prop("interactive") { (view: LiquidGlassNativeView, interactive: Bool?) in
