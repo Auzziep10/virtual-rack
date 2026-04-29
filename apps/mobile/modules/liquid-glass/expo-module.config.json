@@ -1,6 +1,7 @@
 {
   "name": "liquid-glass",
-  "ios": {
+  "platforms": ["apple", "android", "web"],
+  "apple": {
     "modules": [
       "LiquidGlassModule"
     ]
