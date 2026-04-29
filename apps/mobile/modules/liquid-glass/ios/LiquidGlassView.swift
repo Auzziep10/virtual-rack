@@ -57,9 +57,14 @@ public class LiquidGlassNativeView: ExpoView {
 
   public override func layoutSubviews() {
     super.layoutSubviews()
-    
     if let effectView = visualEffectView {
       effectView.frame = self.bounds
+    }
+  }
+
+  public override func didAddSubview(_ subview: UIView) {
+    super.didAddSubview(subview)
+    if let effectView = visualEffectView, subview != effectView {
       self.sendSubviewToBack(effectView)
     }
   }
