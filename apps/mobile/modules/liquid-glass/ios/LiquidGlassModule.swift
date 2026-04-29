@@ -6,16 +6,15 @@ public class LiquidGlassModule: Module {
 
     View(LiquidGlassNativeView.self) {
       Prop("cornerRadius") { (view: LiquidGlassNativeView, cornerRadius: Double?) in
-        view.glassProps.cornerRadius = cornerRadius ?? 0.0
+        view.cornerRadius = cornerRadius ?? 0.0
       }
       
       Prop("tint") { (view: LiquidGlassNativeView, tint: String?) in
-        view.glassProps.tint = tint ?? "light"
-        view.updateFallbackView()
+        view.tint = tint ?? "light"
       }
       
       Prop("interactive") { (view: LiquidGlassNativeView, interactive: Bool?) in
-        view.glassProps.interactive = interactive ?? false
+        view.interactive = interactive ?? false
       }
     }
   }
