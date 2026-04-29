@@ -1,0 +1,8 @@
+{
+  "name": "liquid-glass",
+  "ios": {
+    "modules": [
+      "LiquidGlassModule"
+    ]
+  }
+}

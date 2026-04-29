@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ActivityIndicator, Dimensions } from 'react-native';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { BlurView } from 'expo-blur';
+import { LiquidGlassView } from '../../modules/liquid-glass/src';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -106,9 +107,10 @@ export default function CustomCameraScreen() {
       <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
         
         {/* Top Controls Overlay */}
-        <BlurView 
-          intensity={100} 
-          tint="systemThinMaterialDark" 
+        <LiquidGlassView 
+          cornerRadius={30}
+          tint="dark" 
+          interactive={true}
           style={[styles.topControls, { paddingTop: insets.top + 10 }]}
         >
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
@@ -127,7 +129,7 @@ export default function CustomCameraScreen() {
           <TouchableOpacity style={styles.iconButton} onPress={toggleCameraFacing}>
             <IconSymbol name="camera.rotate" size={24} color="#fff" />
           </TouchableOpacity>
-        </BlurView>
+        </LiquidGlassView>
 
         {/* Huge Countdown Display */}
         <View style={[styles.countdownContainer, { opacity: countdown !== null ? 1 : 0 }]}>
@@ -135,9 +137,10 @@ export default function CustomCameraScreen() {
         </View>
 
         {/* Bottom Controls Overlay */}
-        <BlurView 
-          intensity={100} 
-          tint="systemThinMaterialDark" 
+        <LiquidGlassView 
+          cornerRadius={40}
+          tint="dark" 
+          interactive={true}
           style={[styles.bottomControls, { paddingBottom: insets.bottom + 30 }]}
         >
           <TouchableOpacity style={styles.libraryButton} onPress={pickFromLibrary}>
@@ -156,7 +159,7 @@ export default function CustomCameraScreen() {
           
           {/* Empty view for flex balance */}
           <View style={{ width: 44 }} />
-        </BlurView>
+        </LiquidGlassView>
         
       </CameraView>
     </View>
