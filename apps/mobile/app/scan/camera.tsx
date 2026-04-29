@@ -108,7 +108,7 @@ export default function CustomCameraScreen() {
         {/* Top Controls Overlay */}
         <BlurView 
           intensity={80} 
-          tint="dark" 
+          tint="systemUltraThinMaterialDark" 
           style={[styles.topControls, { paddingTop: insets.top + 10 }]}
         >
           <TouchableOpacity style={styles.iconButton} onPress={() => router.back()}>
@@ -137,7 +137,7 @@ export default function CustomCameraScreen() {
         {/* Bottom Controls Overlay */}
         <BlurView 
           intensity={80} 
-          tint="dark" 
+          tint="systemUltraThinMaterialDark" 
           style={[styles.bottomControls, { paddingBottom: insets.bottom + 30 }]}
         >
           <TouchableOpacity style={styles.libraryButton} onPress={pickFromLibrary}>

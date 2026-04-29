@@ -122,7 +122,7 @@ export default function ViewTryOnScreen() {
                 style={styles.circleButton}
                 onPress={() => Alert.alert("Garment Info", item.garmentName)}
               >
-                <BlurView intensity={60} tint="light" style={styles.circleBlur}>
+                <BlurView intensity={60} tint="systemUltraThinMaterialLight" style={styles.circleBlur}>
                   <IconSymbol name="info.circle" size={22} color="#111" />
                 </BlurView>
               </TouchableOpacity>
@@ -131,7 +131,7 @@ export default function ViewTryOnScreen() {
                 style={styles.pillButton}
                 onPress={() => router.push({ pathname: '/scan/occasion', params: { imageUri: encodeURIComponent(item.imageUrl) } })}
               >
-                <BlurView intensity={60} tint="light" style={styles.pillBlur}>
+                <BlurView intensity={60} tint="systemUltraThinMaterialLight" style={styles.pillBlur}>
                   <IconSymbol name="sparkles" size={18} color="#111" />
                   <Text style={styles.pillText}>Try More</Text>
                 </BlurView>
@@ -147,7 +147,7 @@ export default function ViewTryOnScreen() {
           style={styles.closeButton}
           onPress={() => router.back()}
         >
-          <BlurView intensity={40} tint="light" style={styles.closeBlur}>
+          <BlurView intensity={40} tint="systemUltraThinMaterialLight" style={styles.closeBlur}>
             <IconSymbol name="xmark" size={20} color="#000" />
           </BlurView>
         </TouchableOpacity>
