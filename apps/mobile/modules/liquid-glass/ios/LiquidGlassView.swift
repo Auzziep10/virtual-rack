@@ -76,12 +76,18 @@ public class LiquidGlassNativeView: ExpoView {
     
     if let hostView = hostingController?.view {
       hostView.frame = self.bounds
+      self.sendSubviewToBack(hostView)
     }
     
     if let fallback = fallbackView {
       fallback.frame = self.bounds
       fallback.layer.cornerRadius = CGFloat(glassProps.cornerRadius)
       fallback.clipsToBounds = true
+      
+      let blurStyle: UIBlurEffect.Style = glassProps.tint == "dark" ? .systemThinMaterialDark : (glassProps.tint == "light" ? .systemThinMaterialLight : .systemThinMaterial)
+      fallback.effect = UIBlurEffect(style: blurStyle)
+      
+      self.sendSubviewToBack(fallback)
     }
   }
 }

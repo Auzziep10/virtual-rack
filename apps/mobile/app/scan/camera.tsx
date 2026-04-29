@@ -104,8 +104,9 @@ export default function CustomCameraScreen() {
 
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        
+      <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+      
+      <View style={[StyleSheet.absoluteFill, { justifyContent: 'space-between' }]}>
         {/* Top Controls Overlay */}
         <LiquidGlassView 
           cornerRadius={30}
@@ -160,8 +161,7 @@ export default function CustomCameraScreen() {
           {/* Empty view for flex balance */}
           <View style={{ width: 44 }} />
         </LiquidGlassView>
-        
-      </CameraView>
+      </View>
     </View>
   );
 }
