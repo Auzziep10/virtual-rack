@@ -7,6 +7,7 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import { useIsFocused } from '@react-navigation/native';
 import * as ImageManipulator from 'expo-image-manipulator';
 
 export default function CustomCameraScreen() {
@@ -102,9 +103,11 @@ export default function CustomCameraScreen() {
     }
   };
 
+  const isFocused = useIsFocused();
+
   return (
     <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef} />
+      {isFocused && <CameraView style={styles.camera} facing={facing} ref={cameraRef} />}
       
       <View style={[StyleSheet.absoluteFill, { justifyContent: 'space-between' }]}>
         {/* Top Controls Overlay */}
