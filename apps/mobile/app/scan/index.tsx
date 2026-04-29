@@ -72,6 +72,11 @@ export default function ScanningScreen() {
     setProcessingProgress(event.nativeEvent.progress);
   };
 
+  const handleError = (event: any) => {
+    console.warn("Scanner Error:", event.nativeEvent?.message);
+    Alert.alert("Scanner Error", event.nativeEvent?.message || "An error occurred with the 3D scanner.");
+  };
+
   const handleModelReady = async (event: any) => {
     const objUri = event.nativeEvent.uri || event.nativeEvent.path;
     console.log("Model ready at", objUri);
