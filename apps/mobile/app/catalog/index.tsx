@@ -84,8 +84,8 @@ export default function BrandCatalogScreen() {
                   contentFit="cover" 
                 />
                 <BlurView intensity={60} tint="light" style={styles.cardInfo}>
-                  <Text style={styles.cardTitle}>{pack.packName || 'Untitled Garment'}</Text>
-                  <Text style={styles.cardCompany}>{pack.companyName || 'Unknown Brand'}</Text>
+                  <Text style={styles.cardTitle}>{pack.name || pack.packName || 'Untitled Garment'}</Text>
+                  <Text style={styles.cardCompany}>{pack.companyId || pack.companyName || 'Unknown Brand'}</Text>
                   {pack.scannedModelUrl && (
                     <View style={styles.badge}>
                       <IconSymbol name="arkit" size={12} color="#000" />
