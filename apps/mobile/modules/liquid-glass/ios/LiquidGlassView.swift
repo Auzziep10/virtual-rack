@@ -16,25 +16,10 @@ struct SwiftUILiquidGlassView: View {
   
   var body: some View {
     Color.clear
-      .glassEffect(
-        props.tint == "dark" ? .regular.tint(.black) : (props.tint == "orange" ? .regular.tint(.orange) : .regular),
-        in: .rect(cornerRadius: props.cornerRadius)
-      )
-      .modifier(InteractiveGlassModifier(interactive: props.interactive))
+      .background(.ultraThinMaterial)
+      .environment(\.colorScheme, props.tint == "dark" ? .dark : .light)
+      .cornerRadius(CGFloat(props.cornerRadius))
       .edgesIgnoringSafeArea(.all)
-  }
-}
-
-// Helper to apply the interactive modifier conditionally
-@available(iOS 15.0, *)
-struct InteractiveGlassModifier: ViewModifier {
-  var interactive: Bool
-  func body(content: Content) -> some View {
-    if interactive {
-      content.glassEffect(.regular.interactive())
-    } else {
-      content
-    }
   }
 }
 
