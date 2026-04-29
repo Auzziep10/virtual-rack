@@ -8,21 +8,27 @@ public class BodyScannerModule: Module {
 
     View(BodyScannerNativeView.self) {
       Events("onModelReady", "onError", "onProgress")
+    }
 
-      AsyncFunction("startSession") { (view: BodyScannerNativeView) -> Bool in
-          view.startSession()
-          return true
-      }
+    AsyncFunction("startSession") { (viewTag: Int, promise: Promise) in
+        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+            view.startSession()
+        }
+        promise.resolve(nil)
+    }
 
-      AsyncFunction("startCapturing") { (view: BodyScannerNativeView) -> Bool in
-          view.startCapturing()
-          return true
-      }
+    AsyncFunction("startCapturing") { (viewTag: Int, promise: Promise) in
+        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+            view.startCapturing()
+        }
+        promise.resolve(nil)
+    }
 
-      AsyncFunction("stopSession") { (view: BodyScannerNativeView) -> Bool in
-          view.stopSession()
-          return true
-      }
+    AsyncFunction("stopSession") { (viewTag: Int, promise: Promise) in
+        if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+            view.stopSession()
+        }
+        promise.resolve(nil)
     }
 
     AsyncFunction("previewModel") { (urlString: String, promise: Promise) in

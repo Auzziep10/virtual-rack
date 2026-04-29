@@ -1,10 +1,13 @@
-import { requireNativeViewManager } from 'expo-modules-core';
+import { requireNativeViewManager, requireNativeModule } from 'expo-modules-core';
 import * as React from 'react';
+import { findNodeHandle } from 'react-native';
 
 import { BodyScannerViewProps } from './BodyScanner.types';
 
 const NativeEnvironmentView: React.ComponentType<BodyScannerViewProps> =
   requireNativeViewManager('BodyScanner', 'BodyScannerNativeView');
+
+const BodyScannerModule = requireNativeModule('BodyScanner');
 
 export interface BodyScannerViewRef {
   startSession: () => Promise<void>;
@@ -18,18 +21,21 @@ export const BodyScannerNativeView = React.forwardRef<BodyScannerViewRef, BodySc
 
     React.useImperativeHandle(ref, () => ({
       async startSession() {
-        if (nativeRef.current) {
-          await (nativeRef.current as any).startSession();
+        const tag = findNodeHandle(nativeRef.current);
+        if (tag) {
+          await BodyScannerModule.startSession(tag);
         }
       },
       async startCapturing() {
-        if (nativeRef.current) {
-          await (nativeRef.current as any).startCapturing();
+        const tag = findNodeHandle(nativeRef.current);
+        if (tag) {
+          await BodyScannerModule.startCapturing(tag);
         }
       },
       async stopSession() {
-        if (nativeRef.current) {
-          await (nativeRef.current as any).stopSession();
+        const tag = findNodeHandle(nativeRef.current);
+        if (tag) {
+          await BodyScannerModule.stopSession(tag);
         }
       }
     }));
