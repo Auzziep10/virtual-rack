@@ -11,6 +11,7 @@ const BodyScannerModule = requireNativeModule('BodyScanner');
 
 export interface BodyScannerViewRef {
   startSession: () => Promise<void>;
+  startDetecting: () => Promise<void>;
   startCapturing: () => Promise<void>;
   stopSession: () => Promise<void>;
 };
@@ -24,6 +25,12 @@ export const BodyScannerNativeView = React.forwardRef<BodyScannerViewRef, BodySc
         const tag = findNodeHandle(nativeRef.current);
         if (tag) {
           await BodyScannerModule.startSession(tag);
+        }
+      },
+      async startDetecting() {
+        const tag = findNodeHandle(nativeRef.current);
+        if (tag) {
+          await BodyScannerModule.startDetecting(tag);
         }
       },
       async startCapturing() {

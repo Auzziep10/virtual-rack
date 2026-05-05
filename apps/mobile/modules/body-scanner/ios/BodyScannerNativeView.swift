@@ -8,7 +8,6 @@ struct iOS18ObjectCaptureWrapper: View {
     var session: ObjectCaptureSession
     var body: some View {
         ObjectCaptureView(session: session)
-            .hideObjectReticle()
     }
 }
 
@@ -17,6 +16,7 @@ class BodyScannerNativeView: ExpoView {
     let onModelReady = EventDispatcher()
     let onError = EventDispatcher()
     let onProgress = EventDispatcher()
+    let onStateChange = EventDispatcher()
 
     private var hostingController: UIHostingController<AnyView>?
     private var session: ObjectCaptureSession?
@@ -47,10 +47,26 @@ class BodyScannerNativeView: ExpoView {
             
             Task {
                 for await state in newSession.stateUpdates {
-                    if case .completed = state {
-                        self.processPhotogrammetry()
-                    } else if case .failed(let error) = state {
-                        self.onError(["message": "Capture failed: \(error.localizedDescription)"])
+                    DispatchQueue.main.async {
+                        switch state {
+                        case .initializing:
+                            self.onStateChange(["state": "initializing"])
+                        case .ready:
+                            self.onStateChange(["state": "ready"])
+                        case .detecting:
+                            self.onStateChange(["state": "detecting"])
+                        case .capturing:
+                            self.onStateChange(["state": "capturing"])
+                        case .finishing:
+                            self.onStateChange(["state": "finishing"])
+                        case .completed:
+                            self.onStateChange(["state": "completed"])
+                            self.processPhotogrammetry()
+                        case .failed(let error):
+                            self.onError(["message": "Capture failed: \(error.localizedDescription)"])
+                        @unknown default:
+                            break
+                        }
                     }
                 }
             }
@@ -73,6 +89,13 @@ class BodyScannerNativeView: ExpoView {
     override func layoutSubviews() {
         super.layoutSubviews()
         hostingController?.view.frame = bounds
+    }
+
+    public func startDetecting() {
+        DispatchQueue.main.async {
+            guard let session = self.session else { return }
+            session.startDetecting()
+        }
     }
 
     public func startCapturing() {

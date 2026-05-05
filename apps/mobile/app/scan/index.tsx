@@ -16,6 +16,7 @@ export default function ScanningScreen() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [scannerState, setScannerState] = useState<string>('initializing');
   const [permission, requestPermission] = useCameraPermissions();
 
   const isMountedRef = useRef(true);
@@ -54,16 +55,27 @@ export default function ScanningScreen() {
   const handleCaptureToggle = () => {
     if (!scannerRef.current) return;
     
-    if (!isCapturing) {
-      // Start taking photos
+    if (scannerState === 'ready') {
+      scannerRef.current.startDetecting();
+    } else if (scannerState === 'detecting') {
       scannerRef.current.startCapturing();
       setIsCapturing(true);
-    } else {
-      // Finish capturing and trigger photogrammetry
+    } else if (scannerState === 'capturing') {
       setIsCapturing(false);
       setIsProcessing(true);
       setProcessingProgress(0);
       scannerRef.current.stopSession();
+    }
+  };
+
+  const handleStateChange = (event: any) => {
+    const state = event.nativeEvent.state;
+    console.log("Scanner State Changed:", state);
+    setScannerState(state);
+    
+    if (state === 'finishing' || state === 'completed') {
+      setIsCapturing(false);
+      setIsProcessing(true);
     }
   };
 
@@ -134,6 +146,7 @@ export default function ScanningScreen() {
         onModelReady={handleModelReady}
         onError={handleError}
         onProgress={handleProgress}
+        onStateChange={handleStateChange}
       />
       
       {/* Top Bar */}
@@ -175,23 +188,38 @@ export default function ScanningScreen() {
       )}
 
       {/* Controls Container */}
-      <View style={styles.controlsContainer}>
-        <View style={{ width: 80 }} />
+      {!isProcessing && (
+        <View style={styles.controlsContainer}>
+          <View style={{ width: 80 }} />
 
-        <TouchableOpacity 
-          style={[styles.captureButton, isCapturing && { backgroundColor: '#ff3b30' }]}
-          onPress={handleCaptureToggle}
-          disabled={isProcessing}
-        >
-          {isCapturing ? (
-            <IconSymbol name="checkmark" size={32} color="#fff" />
+          {scannerState === 'initializing' ? (
+             <View style={styles.captureButton}>
+                <ActivityIndicator color="#000" />
+             </View>
           ) : (
-            <IconSymbol name="camera.viewfinder" size={32} color="#fff" />
+            <TouchableOpacity 
+              style={[
+                styles.captureButton, 
+                scannerState === 'ready' && { backgroundColor: '#007AFF' },
+                scannerState === 'detecting' && { backgroundColor: '#34C759' },
+                scannerState === 'capturing' && { backgroundColor: '#ff3b30' }
+              ]}
+              onPress={handleCaptureToggle}
+              disabled={isProcessing}
+            >
+              {scannerState === 'ready' ? (
+                <Text style={styles.buttonLabel}>Setup Box</Text>
+              ) : scannerState === 'detecting' ? (
+                <Text style={styles.buttonLabel}>Start Scan</Text>
+              ) : scannerState === 'capturing' ? (
+                <IconSymbol name="checkmark" size={32} color="#fff" />
+              ) : null}
+            </TouchableOpacity>
           )}
-        </TouchableOpacity>
-        
-        <View style={{ width: 80 }} />
-      </View>
+          
+          <View style={{ width: 80 }} />
+        </View>
+      )}
     </View>
   );
 }
@@ -263,6 +291,11 @@ const styles = StyleSheet.create({
     marginTop: 6,
     fontWeight: '600',
     letterSpacing: 1,
+  },
+  buttonLabel: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   captureButton: {
     width: 72,

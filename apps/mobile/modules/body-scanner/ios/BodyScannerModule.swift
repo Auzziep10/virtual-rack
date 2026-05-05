@@ -7,13 +7,22 @@ public class BodyScannerModule: Module {
     Name("BodyScanner")
 
     View(BodyScannerNativeView.self) {
-      Events("onModelReady", "onError", "onProgress")
+      Events("onModelReady", "onError", "onProgress", "onStateChange")
     }
 
     AsyncFunction("startSession") { (viewTag: Int, promise: Promise) in
         DispatchQueue.main.async {
             if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
                 view.startSession()
+            }
+            promise.resolve(nil)
+        }
+    }
+
+    AsyncFunction("startDetecting") { (viewTag: Int, promise: Promise) in
+        DispatchQueue.main.async {
+            if let view = try? self.appContext?.findView(withTag: viewTag, ofType: BodyScannerNativeView.self) {
+                view.startDetecting()
             }
             promise.resolve(nil)
         }
