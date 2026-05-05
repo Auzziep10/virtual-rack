@@ -127,7 +127,7 @@ class BodyScannerNativeView: ExpoView {
             // Use .reduced detail and sequential ordering to prevent Memory/CoreOC Error 6 on iPhones
             let request = PhotogrammetrySession.Request.modelFile(url: usdzFileURL, detail: .reduced)
             var config = PhotogrammetrySession.Configuration()
-            config.isObjectMaskingEnabled = false
+            config.isObjectMaskingEnabled = true
             config.sampleOrdering = .sequential
             config.featureSensitivity = .high
             let pSession = try PhotogrammetrySession(input: dir, configuration: config)
