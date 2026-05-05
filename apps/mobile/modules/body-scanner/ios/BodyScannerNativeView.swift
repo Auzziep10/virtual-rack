@@ -43,8 +43,7 @@ class BodyScannerNativeView: ExpoView {
             self.scanDir = dir
             self.session = newSession
             
-            newSession.start(imagesDirectory: dir, configuration: configuration)
-            
+            // CRITICAL: Start listening to stateUpdates BEFORE calling start() to avoid missing initial states
             Task {
                 for await state in newSession.stateUpdates {
                     DispatchQueue.main.async {
@@ -70,6 +69,8 @@ class BodyScannerNativeView: ExpoView {
                     }
                 }
             }
+            
+            newSession.start(imagesDirectory: dir, configuration: configuration)
 
             let finalView: AnyView
             if #available(iOS 18.0, *) {
