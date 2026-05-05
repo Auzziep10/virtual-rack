@@ -4,7 +4,7 @@ import { Image } from 'expo-image';
 import { BlurView } from 'expo-blur';
 import { useRouter } from 'expo-router';
 import { collection, getDocs, orderBy, query, limit } from 'firebase/firestore';
-import { signInAnonymously } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { techPackDb, techPackAuth } from '../../lib/techPackFirebase';
 import { IconSymbol } from '../../components/ui/icon-symbol';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -17,7 +17,9 @@ export default function BrandCatalogScreen() {
   useEffect(() => {
     const fetchTechPacks = async () => {
       try {
-        await signInAnonymously(techPackAuth);
+        // Authenticate with a dedicated read-only viewer account 
+        // that exists in the tech-pack-creator Firebase project
+        await signInWithEmailAndPassword(techPackAuth, 'viewer@wovn.com', 'wovnviewer123');
         
         const q = query(
           collection(techPackDb, 'techPacks'),
