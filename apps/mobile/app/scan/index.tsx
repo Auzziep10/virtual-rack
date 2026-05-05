@@ -198,22 +198,25 @@ export default function ScanningScreen() {
              </View>
           ) : (
             <TouchableOpacity 
-              style={[
-                styles.captureButton, 
-                scannerState === 'ready' && { backgroundColor: '#007AFF' },
-                scannerState === 'detecting' && { backgroundColor: '#34C759' },
-                scannerState === 'capturing' && { backgroundColor: '#ff3b30' }
-              ]}
+              activeOpacity={0.8}
               onPress={handleCaptureToggle}
               disabled={isProcessing}
             >
-              {scannerState === 'ready' ? (
-                <Text style={styles.buttonLabel}>Setup Box</Text>
-              ) : scannerState === 'detecting' ? (
-                <Text style={styles.buttonLabel}>Start Scan</Text>
-              ) : scannerState === 'capturing' ? (
-                <IconSymbol name="checkmark" size={32} color="#fff" />
-              ) : null}
+              {scannerState === 'capturing' ? (
+                <View style={[styles.captureButton, { backgroundColor: '#ff3b30', borderColor: 'transparent' }]}>
+                  <IconSymbol name="checkmark" size={32} color="#fff" />
+                </View>
+              ) : (
+                <BlurView 
+                  intensity={80} 
+                  tint="systemThinMaterialDark" 
+                  style={styles.pillButton}
+                >
+                  <Text style={styles.buttonLabel}>
+                    {scannerState === 'ready' ? 'SETUP BOX' : 'START SCAN'}
+                  </Text>
+                </BlurView>
+              )}
             </TouchableOpacity>
           )}
           
@@ -295,7 +298,18 @@ const styles = StyleSheet.create({
   buttonLabel: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: '700',
+    letterSpacing: 2,
+  },
+  pillButton: {
+    paddingHorizontal: 40,
+    height: 56,
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
   captureButton: {
     width: 72,
